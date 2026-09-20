@@ -16,6 +16,7 @@ import {
   type TemplateRef,
 } from '@angular/core';
 import { NgTemplateOutlet } from '@angular/common';
+import { adoptStyles } from '../core/adopt-styles';
 import { AvDateAdapter } from '../core/date-adapter';
 import { AV_CALENDAR_DEFAULTS } from '../core/defaults';
 import {
@@ -107,6 +108,7 @@ export class AvCalendar {
   /** Exposed so a host component can share one adapter with its own input. */
   readonly adapter = inject(AvDateAdapter);
 
+  private readonly hostElement = inject<ElementRef<HTMLElement>>(ElementRef);
   private readonly gridRef = viewChild<ElementRef<HTMLElement>>('grid');
 
   /** The selected day. Two-way bindable. */
@@ -139,6 +141,16 @@ export class AvCalendar {
   /** Theme class applied to the calendar root. */
   readonly theme = input<string | null>(null);
 
+  /**
+   * CSS adopted into this component's shadow root, alongside its own.
+   *
+   * Markup passed in through a template is rendered inside the shadow root,
+   * where your application's stylesheet cannot reach it. Hand the classes that
+   * markup needs over here. Custom properties inherit across the boundary on
+   * their own and do not need this.
+   */
+  readonly extraStyles = input<string | readonly string[] | null>(null);
+
   readonly disabled = input(false);
 
   readonly todayLabel = input('Today');
@@ -170,7 +182,18 @@ export class AvCalendar {
   /** Set when a command should pull DOM focus to the active cell afterwards. */
   private pendingFocus = false;
 
+  /** Sheets this component put on the shadow root, so it can replace its own. */
+  private adopted: readonly CSSStyleSheet[] = [];
+
   constructor() {
+    effect(() => {
+      const css = this.extraStyles();
+      untracked(() => {
+        const root = this.hostElement.nativeElement.shadowRoot;
+        this.adopted = adoptStyles(root, css, this.adopted);
+      });
+    });
+
     // The selected value dictates what is on screen and where focus sits.
     // Reads only `value`, so nothing it writes can re-trigger it.
     effect(() => {

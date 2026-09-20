@@ -27,6 +27,7 @@ import {
 } from '@angular/forms';
 import { NgTemplateOutlet } from '@angular/common';
 import { AvCalendar } from '../calendar/av-calendar';
+import { adoptStyles } from '../core/adopt-styles';
 import { AvDateAdapter } from '../core/date-adapter';
 import { AV_CALENDAR_DEFAULTS, mergeConfig } from '../core/defaults';
 import { maskSpecFor } from '../core/date-format';
@@ -93,7 +94,7 @@ let uniqueId = 0;
 export class AvDatePicker implements ControlValueAccessor, Validator, DoCheck, OnDestroy {
   private readonly defaults = inject(AV_CALENDAR_DEFAULTS);
   private readonly adapter = inject(AvDateAdapter);
-  private readonly host = inject<ElementRef<HTMLElement>>(ElementRef);
+  private readonly hostElement = inject<ElementRef<HTMLElement>>(ElementRef);
 
   private readonly inputRef = viewChild<ElementRef<HTMLInputElement>>('field');
   private readonly fieldRef = viewChild<ElementRef<HTMLElement>>('fieldBox');
@@ -178,6 +179,16 @@ export class AvDatePicker implements ControlValueAccessor, Validator, DoCheck, O
   /** Render the calendar in the layout instead of in a popover. */
   readonly inline = input(false);
 
+  /**
+   * CSS adopted into this component's shadow root, alongside its own.
+   *
+   * Markup passed in through a template is rendered inside the shadow root,
+   * where your application's stylesheet cannot reach it. Hand the classes that
+   * markup needs over here. Custom properties inherit across the boundary on
+   * their own and do not need this.
+   */
+  readonly extraStyles = input<string | readonly string[] | null>(null);
+
   readonly disabled = input(false);
   readonly readonly = input(false);
 
@@ -256,7 +267,18 @@ export class AvDatePicker implements ControlValueAccessor, Validator, DoCheck, O
    */
   private controlRef: AbstractControl | null = null;
 
+  /** Sheets this component put on the shadow root, so it can replace its own. */
+  private adopted: readonly CSSStyleSheet[] = [];
+
   constructor() {
+    effect(() => {
+      const css = this.extraStyles();
+      untracked(() => {
+        const root = this.hostElement.nativeElement.shadowRoot;
+        this.adopted = adoptStyles(root, css, this.adopted);
+      });
+    });
+
     // An externally set value re-renders the text, unless the user is mid-edit.
     effect(() => {
       const value = this.value();
@@ -805,7 +827,7 @@ export class AvDatePicker implements ControlValueAccessor, Validator, DoCheck, O
     queueMicrotask(() => this.calendarRef()?.focus());
 
     const onDocumentPointer = (event: Event) => {
-      if (isOutside(event, [this.host.nativeElement, panel])) {
+      if (isOutside(event, [this.hostElement.nativeElement, panel])) {
         this.markTouched();
         this.close({ restoreFocus: false });
       }
@@ -870,7 +892,7 @@ export class AvDatePicker implements ControlValueAccessor, Validator, DoCheck, O
       const panel = this.panelRef()?.nativeElement;
       const inside =
         (panel && active && panel.contains(active)) ||
-        (active && this.host.nativeElement.contains(active));
+        (active && this.hostElement.nativeElement.contains(active));
       if (!inside) this.close({ restoreFocus: false });
     });
   }

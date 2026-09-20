@@ -274,15 +274,66 @@ locality.
 ```
 
 Shipped: `av-theme-default`, `av-theme-midnight`, `av-theme-rose`,
-`av-theme-forest`, `av-theme-mono`, `av-theme-glass`. The default follows the
-page into dark mode via `prefers-color-scheme`; add `av-dark` to the element to
-force it.
+`av-theme-forest`, `av-theme-mono`, `av-theme-glass`.
 
 **3. Set tokens on the element itself.**
 
 ```html
 <av-date-picker [style.--av-accent]="brandColour()" />
 ```
+
+### Dark mode
+
+The default theme's colours are `light-dark()` pairs, so they follow the
+`color-scheme` in effect. That property inherits through a shadow boundary,
+which makes it the one mechanism by which your own dark-mode switch reaches
+inside the component:
+
+```css
+html {
+  color-scheme: light;
+}
+html.dark {
+  color-scheme: dark;
+}
+```
+
+A page that declares nothing gets the operating system preference. To force a
+single field either way, add `av-dark` or `av-theme-light` to it.
+
+This deliberately does not key off `prefers-color-scheme`, which reads the
+operating system and would leave a light page holding dark date fields.
+
+### Styling content you pass in
+
+Encapsulation has one sharp edge. Markup you supply through `dayTemplate` is
+rendered _inside_ the shadow root, where your application's stylesheet cannot
+reach it. Tokens still inherit, so colours and spacing work, but your own class
+names do not.
+
+`extraStyles` is the deliberate way through. Only what you hand over crosses the
+boundary:
+
+```html
+<av-calendar [dayTemplate]="priceCell" [extraStyles]="priceCellStyles" />
+
+<ng-template #priceCell let-day="day" let-date>
+  <span class="cell">
+    <span>{{ day }}</span>
+    <span class="rate">{{ rateFor(date) }}</span>
+  </span>
+</ng-template>
+```
+
+```ts
+readonly priceCellStyles = `
+  .cell { display: flex; flex-direction: column; align-items: center; }
+  .rate { font-size: 0.55rem; opacity: 0.55; }
+`;
+```
+
+It takes a string or an array of strings, and is adopted as a constructable
+stylesheet, so the same CSS on a hundred calendars is parsed once and shared.
 
 ### Tokens
 
@@ -414,7 +465,7 @@ Inputs not already covered: `label`, `hint`, `placeholder`, `displayFormat`,
 `max`, `dateFilter`, `required`, `errorMessages`, `hideErrors`, `theme`,
 `panelClass`, `inputClass`, `disabled`, `readonly`, `name`, `inputId`,
 `firstDayOfWeek`, `startView`, `keepOpenOnSelect`, `showOutsideDays`,
-`todayLabel`, `clearLabel`, `dayTemplate`.
+`todayLabel`, `clearLabel`, `dayTemplate`, `extraStyles`, `panelAlign`.
 
 Outputs: `valueChange`, `opened`, `closed`, `invalidInput`.
 
@@ -425,7 +476,7 @@ Methods: `openPanel()`, `close()`, `toggle()`.
 Inputs: `value`, `activeDate`, `min`, `max`, `dateFilter`, `firstDayOfWeek`,
 `numberOfMonths`, `showWeekNumbers`, `showFooter`, `showOutsideDays`,
 `startView`, `size`, `theme`, `disabled`, `todayLabel`, `clearLabel`,
-`dayTemplate`, `headerTemplate`.
+`dayTemplate`, `headerTemplate`, `extraStyles`.
 
 Outputs: `valueChange`, `activeDateChange`, `dateSelected`, `cleared`,
 `closeRequested`, `viewChanged`.
@@ -483,9 +534,13 @@ stale build; the styles ship inside the component and cannot be missing
 independently. If you have set `encapsulation` on a wrapping component, that
 does not affect these.
 
-**My global styles do not reach the calendar.** By design. Use the tokens; see
-[Theming](#theming). If a case genuinely needs more than a token, open an issue
-so the token set can grow.
+**My global styles do not reach the calendar.** By design. Use the tokens for
+anything visual; see [Theming](#theming). For markup you pass in through
+`dayTemplate`, hand its CSS over via `extraStyles`.
+
+**The component is dark while my page is light, or the reverse.** Set
+`color-scheme` on your root element to match your page's theme. The default
+theme follows it; see [Dark mode](#dark-mode).
 
 **The panel is clipped or behind something.** It should not be, since it renders
 in the top layer. If you see this, check whether an ancestor sets a `transform`,

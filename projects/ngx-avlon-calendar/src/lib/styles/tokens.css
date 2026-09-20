@@ -35,35 +35,35 @@
   --av-panel-padding: 1rem;
 
   /* Surfaces */
-  --av-surface: #ffffff;
-  --av-surface-sunken: #f1f5f9;
-  --av-surface-hover: #f1f5f9;
-  --av-panel-surface: #ffffff;
+  --av-surface: light-dark(#ffffff, #10151f);
+  --av-surface-sunken: light-dark(#f1f5f9, #171d2a);
+  --av-surface-hover: light-dark(#f1f5f9, #1c2433);
+  --av-panel-surface: light-dark(#ffffff, #131924);
 
   /* Lines */
-  --av-border: #d7dce5;
-  --av-border-hover: #b6bfcd;
-  --av-divider: #eaeef4;
+  --av-border: light-dark(#d7dce5, #2a3344);
+  --av-border-hover: light-dark(#b6bfcd, #3b4658);
+  --av-divider: light-dark(#eaeef4, #212938);
 
   /* Text */
-  --av-fg: #0f172a;
-  --av-fg-muted: #64748b;
-  --av-fg-subtle: #a3adbd;
-  --av-fg-placeholder: #9aa5b5;
+  --av-fg: light-dark(#0f172a, #e8ecf4);
+  --av-fg-muted: light-dark(#64748b, #8f9cb3);
+  --av-fg-subtle: light-dark(#a3adbd, #5b6779);
+  --av-fg-placeholder: light-dark(#9aa5b5, #5b6779);
 
   /* Accent */
-  --av-accent: #4f46e5;
-  --av-accent-hover: #4338ca;
-  --av-accent-fg: #ffffff;
-  --av-accent-soft: #eef2ff;
+  --av-accent: light-dark(#4f46e5, #7c7bff);
+  --av-accent-hover: light-dark(#4338ca, #918fff);
+  --av-accent-fg: light-dark(#ffffff, #0b0f17);
+  --av-accent-soft: light-dark(#eef2ff, #1e2140);
   --av-accent-ring: color-mix(in oklab, var(--av-accent) 35%, transparent);
 
   /* State */
-  --av-danger: #dc2626;
-  --av-danger-soft: #fef2f2;
-  --av-danger-border: #f2b8b8;
+  --av-danger: light-dark(#dc2626, #f87171);
+  --av-danger-soft: light-dark(#fef2f2, #2a1618);
+  --av-danger-border: light-dark(#f2b8b8, #5c2b2b);
   --av-today: var(--av-accent);
-  --av-disabled-fg: #c3cad6;
+  --av-disabled-fg: light-dark(#c3cad6, #3f4959);
 
   /* Depth */
   --av-shadow-field: 0 1px 2px 0 rgb(15 23 42 / 0.04);
@@ -98,11 +98,17 @@
  *
  * Shadow encapsulation cuts both ways: the host page's reset cannot reach in
  * either, so without this the browser's default button chrome shows through
- * and every day cell gains an outset border. This is scoped to the shadow root,
- * so it is not a global reset by another name.
+ * and every day cell gains an outset border.
+ *
+ * These are bare element selectors on purpose. Inside a shadow root they can
+ * only ever match this component's own elements, so they are not a global reset
+ * by another name - and at specificity (0,0,1) they stay below every utility
+ * class, which is what a reset has to do. Qualifying them with `:host` would
+ * raise them to (0,1,1) and quietly beat `bg-[var(--av-accent)]`, leaving the
+ * selected day with no fill.
  */
-:host button,
-:host input {
+button,
+input {
   margin: 0;
   padding: 0;
   border: 0;
@@ -115,22 +121,22 @@
   -webkit-appearance: none;
 }
 
-:host button {
+button {
   cursor: pointer;
   text-transform: none;
 }
 
-:host button:disabled {
+button:disabled {
   cursor: default;
 }
 
-:host input::-webkit-outer-spin-button,
-:host input::-webkit-inner-spin-button {
+input::-webkit-outer-spin-button,
+input::-webkit-inner-spin-button {
   appearance: none;
   margin: 0;
 }
 
-:host svg {
+svg {
   display: block;
 }
 
@@ -142,56 +148,30 @@
   border-radius: var(--av-radius-panel);
 }
 
-/* The default theme follows the page into dark mode. `:host-context` is not
-   available in every engine, so the media query is the load-bearing rule and
-   the class selector is the enhancement. */
-@media (prefers-color-scheme: dark) {
-  :host(:not(.av-theme-light)) {
-    --av-surface: #10151f;
-    --av-surface-sunken: #171d2a;
-    --av-surface-hover: #1c2433;
-    --av-panel-surface: #131924;
-    --av-border: #2a3344;
-    --av-border-hover: #3b4658;
-    --av-divider: #212938;
-    --av-fg: #e8ecf4;
-    --av-fg-muted: #8f9cb3;
-    --av-fg-subtle: #5b6779;
-    --av-fg-placeholder: #5b6779;
-    --av-accent: #7c7bff;
-    --av-accent-hover: #918fff;
-    --av-accent-fg: #0b0f17;
-    --av-accent-soft: #1e2140;
-    --av-danger: #f87171;
-    --av-danger-soft: #2a1618;
-    --av-danger-border: #5c2b2b;
-    --av-disabled-fg: #3f4959;
-    --av-shadow-panel: 0 1px 2px rgb(0 0 0 / 0.5), 0 16px 40px -12px rgb(0 0 0 / 0.7);
-  }
+/*
+ * Dark mode.
+ *
+ * The default theme's colours above are `light-dark()` pairs, so they follow
+ * the `color-scheme` in effect. That property inherits through a shadow
+ * boundary, which makes it the one mechanism that lets a page's own dark-mode
+ * switch reach inside the component:
+ *
+ *   html        { color-scheme: light; }
+ *   html.dark   { color-scheme: dark; }
+ *
+ * A page that says nothing gets its OS preference, because `color-scheme` is
+ * left to inherit rather than being pinned here. An individual component can be
+ * forced either way with the `av-dark` or `av-theme-light` class.
+ *
+ * This deliberately does not use `prefers-color-scheme`, which reads the
+ * operating system and would leave a light page holding dark date fields.
+ */
+:host(.av-dark) {
+  color-scheme: dark;
 }
 
-:host(.av-dark),
-:host-context(.dark):host(:not(.av-theme-light)) {
-  --av-surface: #10151f;
-  --av-surface-sunken: #171d2a;
-  --av-surface-hover: #1c2433;
-  --av-panel-surface: #131924;
-  --av-border: #2a3344;
-  --av-border-hover: #3b4658;
-  --av-divider: #212938;
-  --av-fg: #e8ecf4;
-  --av-fg-muted: #8f9cb3;
-  --av-fg-subtle: #5b6779;
-  --av-fg-placeholder: #5b6779;
-  --av-accent: #7c7bff;
-  --av-accent-hover: #918fff;
-  --av-accent-fg: #0b0f17;
-  --av-accent-soft: #1e2140;
-  --av-danger: #f87171;
-  --av-danger-soft: #2a1618;
-  --av-danger-border: #5c2b2b;
-  --av-disabled-fg: #3f4959;
-  --av-shadow-panel: 0 1px 2px rgb(0 0 0 / 0.5), 0 16px 40px -12px rgb(0 0 0 / 0.7);
+:host(.av-theme-light) {
+  color-scheme: light;
 }
 
 /* ------------------------------------------------------------------ *
@@ -200,6 +180,7 @@
 
 /* Midnight: dark whatever the page does. */
 :host(.av-theme-midnight) {
+  color-scheme: dark;
   --av-radius-field: 0.5rem;
   --av-radius-panel: 0.875rem;
   --av-radius-cell: 0.4rem;
@@ -227,6 +208,7 @@
 
 /* Rose: warm paper, round cells, editorial. */
 :host(.av-theme-rose) {
+  color-scheme: light;
   --av-radius-field: 0.875rem;
   --av-radius-panel: 1.25rem;
   --av-radius-cell: 999px;
@@ -254,6 +236,7 @@
 
 /* Forest: low chroma greens, tight radii. */
 :host(.av-theme-forest) {
+  color-scheme: light;
   --av-radius-field: 0.5rem;
   --av-radius-panel: 0.75rem;
   --av-radius-cell: 0.375rem;
@@ -281,6 +264,7 @@
 
 /* Mono: no chroma, hard corners, no motion. */
 :host(.av-theme-mono) {
+  color-scheme: light;
   --av-radius-field: 0.125rem;
   --av-radius-panel: 0.25rem;
   --av-radius-cell: 0.125rem;
@@ -312,6 +296,7 @@
 
 /* Glass: translucent, blurred, sits over imagery. */
 :host(.av-theme-glass) {
+  color-scheme: light;
   --av-radius-field: 0.75rem;
   --av-radius-panel: 1.25rem;
   --av-radius-cell: 0.5rem;

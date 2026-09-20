@@ -86,7 +86,7 @@ button, inline rendering, months shown, week numbers and footer are all inputs.
 `provideAvlonCalendar()` sets application-wide defaults, locale and first day of
 week; component inputs always win locally.
 
-### Isolation
+### Isolation and escape hatches
 
 Both components render with `ViewEncapsulation.ShadowDom` and carry their own
 generated stylesheet. Nothing a host page writes can select into a component,
@@ -95,6 +95,14 @@ across the boundary, which is what keeps theming simple.
 
 The popover is a native top-layer popover, so no ancestor's `overflow` can clip
 it while it stays inside the shadow root.
+
+`extraStyles` adopts consumer CSS into the shadow root as a constructable
+stylesheet, for styling markup passed in through `dayTemplate`. It is the only
+way styles cross the boundary, and it is opt-in.
+
+Dark mode follows the inherited `color-scheme` through `light-dark()`, rather
+than `prefers-color-scheme`, so a page's own theme switch reaches the component
+instead of the operating system overruling it.
 
 ### Accessibility
 

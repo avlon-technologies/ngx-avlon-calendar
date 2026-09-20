@@ -53,6 +53,7 @@ export {
 export type { AvDateNames } from './lib/core/date-format';
 export { parseDate } from './lib/core/date-parse';
 export type { AvParseFailure, AvParseOptions, AvParseResult } from './lib/core/date-parse';
+export { adoptStyles, styleSheetFor, supportsAdoptedStyleSheets } from './lib/core/adopt-styles';
 export { AvMaskController } from './lib/core/mask-controller';
 export type { AvMaskOptions } from './lib/core/mask-controller';
 

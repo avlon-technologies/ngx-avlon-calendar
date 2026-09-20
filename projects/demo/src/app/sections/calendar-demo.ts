@@ -140,6 +140,7 @@ import { DemoExample } from './example';
               size="lg"
               [showFooter]="false"
               [dayTemplate]="priceCell"
+              [extraStyles]="priceCellStyles"
             />
           </div>
 
@@ -150,15 +151,16 @@ import { DemoExample } from './example';
             let-outside="outside"
             let-selected="selected"
           >
-            <span class="flex flex-col items-center pb-1 leading-none">
-              <span class="text-[0.85rem] font-medium">{{ day }}</span>
+            <!--
+              These class names are defined in priceCellStyles below and handed
+              to the calendar through [extraStyles]. This markup is rendered
+              inside the component's shadow root, so the page's own stylesheet
+              cannot reach it.
+            -->
+            <span class="cell">
+              <span class="cell-day">{{ day }}</span>
               @if (!outside) {
-                <span
-                  class="mt-0.5 text-[0.55rem] font-semibold tabular-nums"
-                  [class]="
-                    selected ? 'opacity-90' : isCheap(date) ? 'text-emerald-600' : 'opacity-55'
-                  "
-                >
+                <span class="cell-rate" [class.cheap]="isCheap(date)" [class.on-accent]="selected">
                   {{ rateFor(date) }}
                 </span>
               }
@@ -227,6 +229,42 @@ export class CalendarDemo {
     return !weekend && seed % 9 <= 2;
   }
 
+  /**
+   * Styles for the custom day cell, adopted into the calendar's shadow root.
+   *
+   * The library is encapsulated, so markup passed in through `dayTemplate`
+   * cannot see this application's stylesheet. `extraStyles` is the deliberate
+   * way through: only what is handed over crosses the boundary.
+   */
+  readonly priceCellStyles = `
+    .cell {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      line-height: 1;
+      padding-bottom: 0.2rem;
+    }
+    .cell-day {
+      font-size: 0.85rem;
+      font-weight: 500;
+    }
+    .cell-rate {
+      margin-top: 0.15rem;
+      font-size: 0.55rem;
+      font-weight: 600;
+      font-variant-numeric: tabular-nums;
+      opacity: 0.55;
+    }
+    .cell-rate.cheap {
+      color: #059669;
+      opacity: 1;
+    }
+    .cell-rate.on-accent {
+      color: inherit;
+      opacity: 0.9;
+    }
+  `;
+
   /** The markup behind each example, shown under its source tab. */
   readonly source = {
     inline: `<av-calendar [(value)]="picked" [showWeekNumbers]="true" />`,
@@ -283,17 +321,23 @@ provideAvlonCalendar({ locale: 'en-GB', firstDayOfWeek: 1 })`,
   size="lg"
   [showFooter]="false"
   [dayTemplate]="priceCell"
+  [extraStyles]="priceCellStyles"
 />
 
-<ng-template #priceCell let-date let-day="day" let-outside="outside" let-selected="selected">
-  <span class="flex flex-col items-center pb-1 leading-none">
-    <span class="text-[0.85rem] font-medium">{{ day }}</span>
+<ng-template #priceCell let-date let-day="day" let-outside="outside">
+  <span class="cell">
+    <span class="cell-day">{{ day }}</span>
     @if (!outside) {
-      <span class="mt-0.5 text-[0.55rem] font-semibold tabular-nums">
-        {{ rateFor(date) }}
-      </span>
+      <span class="cell-rate">{{ rateFor(date) }}</span>
     }
   </span>
-</ng-template>`,
+</ng-template>
+
+// The cell renders inside the shadow root, so the page's stylesheet cannot
+// reach it. Hand over the classes it needs:
+priceCellStyles = \`
+  .cell { display: flex; flex-direction: column; align-items: center; }
+  .cell-rate { font-size: 0.55rem; opacity: 0.55; }
+\`;`,
   };
 }
