@@ -85,15 +85,30 @@ jobs:
           echo "Release notes:"
           cat RELEASE_NOTES.md
 
+      # A version already on the registry is not an error worth failing over:
+      # it happens whenever a release was published by hand, or a tag is moved
+      # and re-pushed. Skipping keeps the release notes step reachable.
+      - name: Check whether this version is already published
+        id: published
+        run: |
+          name=$(node -p "require('./dist/ngx-avlon-calendar/package.json').name")
+          version="${{ steps.version.outputs.version }}"
+          if npm view "$name@$version" version >/dev/null 2>&1; then
+            echo "exists=true" >> "$GITHUB_OUTPUT"
+            echo "$name@$version is already on the registry; skipping publish."
+          else
+            echo "exists=false" >> "$GITHUB_OUTPUT"
+          fi
+
       - name: Publish to npm
-        if: github.ref_type == 'tag' || inputs.dry_run == false
-        run: npm publish dist/ngx-avlon-calendar --access public --provenance
+        if: steps.published.outputs.exists == 'false' && (github.ref_type == 'tag' || inputs.dry_run == false)
+        run: npm publish dist/ngx-avlon-calendar --provenance
         env:
           NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
 
       - name: Dry-run publish
         if: github.ref_type != 'tag' && inputs.dry_run != false
-        run: npm publish dist/ngx-avlon-calendar --access public --dry-run
+        run: npm publish dist/ngx-avlon-calendar --dry-run
 
       - name: Create the GitHub release
         if: github.ref_type == 'tag'

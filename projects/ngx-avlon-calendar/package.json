@@ -28,5 +28,10 @@
   "author": "Avlon",
   "publishConfig": {
     "access": "public"
-  }
+  },
+  "files": [
+    "fesm2022",
+    "types",
+    "CHANGELOG.md"
+  ]
 }
