@@ -143,7 +143,13 @@ import { DemoExample } from './example';
             />
           </div>
 
-          <ng-template #priceCell let-date let-day="day" let-outside="outside" let-selected="selected">
+          <ng-template
+            #priceCell
+            let-date
+            let-day="day"
+            let-outside="outside"
+            let-selected="selected"
+          >
             <span class="flex flex-col items-center pb-1 leading-none">
               <span class="text-[0.85rem] font-medium">{{ day }}</span>
               @if (!outside) {

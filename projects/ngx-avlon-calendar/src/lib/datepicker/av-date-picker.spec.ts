@@ -378,7 +378,10 @@ describe('AvDatePicker without a form', () => {
     fixture.detectChanges();
     await fixture.whenStable();
 
-    const clearButton = deepQuery<HTMLButtonElement>(fixture.nativeElement, '[aria-label="Clear date"]');
+    const clearButton = deepQuery<HTMLButtonElement>(
+      fixture.nativeElement,
+      '[aria-label="Clear date"]',
+    );
     expect(clearButton).toBeTruthy();
 
     clearButton!.click();
@@ -534,7 +537,12 @@ describe('AvDatePicker popover', () => {
 @Component({
   imports: [AvDatePicker],
   template: `
-    <av-date-picker [iconPosition]="position()" [theme]="theme()" [inline]="inline()" label="Date" />
+    <av-date-picker
+      [iconPosition]="position()"
+      [theme]="theme()"
+      [inline]="inline()"
+      label="Date"
+    />
   `,
 })
 class PresentationHost {

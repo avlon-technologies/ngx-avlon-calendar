@@ -76,7 +76,8 @@ export function parseDate(
     let d: number | null = null;
     for (const field of spec.fields) {
       const value = Number(trimmed.slice(field.digitStart, field.digitEnd));
-      if (field.kind === 'year') y = field.width === 2 ? expandTwoDigitYear(value, twoDigitYearPivot) : value;
+      if (field.kind === 'year')
+        y = field.width === 2 ? expandTwoDigitYear(value, twoDigitYearPivot) : value;
       else if (field.kind === 'month') m = value;
       else d = value;
     }
@@ -105,7 +106,8 @@ export function parseDate(
 
     if (letter === 'E') {
       // Weekday names carry no value; accept and discard one if it is there.
-      cursor = consumeName(trimmed, cursor, [...names.weekdaysLong, ...names.weekdaysShort]) ?? cursor;
+      cursor =
+        consumeName(trimmed, cursor, [...names.weekdaysLong, ...names.weekdaysShort]) ?? cursor;
       continue;
     }
 
@@ -198,7 +200,12 @@ function consumeDigits(
   max: number,
 ): { text: string; next: number } | null {
   let i = start;
-  while (i < text.length && i - start < max && text.charCodeAt(i) >= 48 && text.charCodeAt(i) <= 57) {
+  while (
+    i < text.length &&
+    i - start < max &&
+    text.charCodeAt(i) >= 48 &&
+    text.charCodeAt(i) <= 57
+  ) {
     i++;
   }
   const length = i - start;

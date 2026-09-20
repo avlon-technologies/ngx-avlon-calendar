@@ -93,14 +93,18 @@ function group<T extends Token>(
           </div>
           <pre
             class="overflow-x-auto whitespace-pre font-mono text-[0.72rem] leading-[1.7] text-slate-300"
-          >{{ markup() }}</pre>
+            >{{ markup() }}</pre>
         </div>
       </div>
 
       <!-- Controls -->
-      <div class="space-y-5 rounded-2xl border border-slate-200 bg-slate-50/60 p-5 dark:border-slate-800 dark:bg-slate-900/60">
+      <div
+        class="space-y-5 rounded-2xl border border-slate-200 bg-slate-50/60 p-5 dark:border-slate-800 dark:bg-slate-900/60"
+      >
         <div>
-          <div class="text-[0.7rem] font-semibold uppercase tracking-widest text-slate-500">Selected</div>
+          <div class="text-[0.7rem] font-semibold uppercase tracking-widest text-slate-500">
+            Selected
+          </div>
           <div class="mt-1 font-mono text-sm text-slate-900 dark:text-slate-100">
             {{ picked() ? picked()!.toDateString() : 'null' }}
           </div>
@@ -108,7 +112,9 @@ function group<T extends Token>(
 
         @for (group of groups; track group.key) {
           <div>
-            <div class="mb-1.5 text-[0.7rem] font-semibold uppercase tracking-widest text-slate-500">
+            <div
+              class="mb-1.5 text-[0.7rem] font-semibold uppercase tracking-widest text-slate-500"
+            >
               {{ group.key }}
             </div>
             <div class="flex flex-wrap gap-1.5">
@@ -136,7 +142,9 @@ function group<T extends Token>(
           </div>
           <div class="grid grid-cols-2 gap-x-3 gap-y-2">
             @for (toggle of toggles; track toggle.label) {
-              <label class="flex cursor-pointer items-center gap-2 text-[0.78rem] text-slate-700 dark:text-slate-300">
+              <label
+                class="flex cursor-pointer items-center gap-2 text-[0.78rem] text-slate-700 dark:text-slate-300"
+              >
                 <input
                   type="checkbox"
                   class="h-3.5 w-3.5 accent-indigo-500"

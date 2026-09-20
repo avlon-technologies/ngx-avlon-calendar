@@ -1,0 +1,15 @@
+# Build output
+dist/
+.angular/
+coverage/
+out-tsc/
+
+# Generated: owned by scripts/build-lib-css.mjs. Formatting it here would make
+# `npm run styles:check` fail, because the generator would produce a different
+# file than the one committed.
+projects/ngx-avlon-calendar/src/lib/styles/av-styles.css
+
+# Not ours
+.claude/
+continuum/
+package-lock.json

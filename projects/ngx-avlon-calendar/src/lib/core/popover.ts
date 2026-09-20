@@ -57,7 +57,9 @@ export function positionPanel(
   const height = Math.min(panel.height, maxHeight);
 
   const top =
-    placement === 'bottom' ? anchor.bottom + offset : Math.max(margin, anchor.top - offset - height);
+    placement === 'bottom'
+      ? anchor.bottom + offset
+      : Math.max(margin, anchor.top - offset - height);
 
   const preferredLeft = options.alignEnd ? anchor.right - panel.width : anchor.left;
   const maxLeft = Math.max(margin, viewport.width - panel.width - margin);

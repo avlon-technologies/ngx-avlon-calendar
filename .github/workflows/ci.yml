@@ -36,7 +36,7 @@ jobs:
         run: npm ci
 
       - name: Check formatting
-        run: npx prettier --check "projects/**/*.{ts,html,css,json,md}" "*.{json,md}"
+        run: npm run format:check
 
       # The stylesheet is generated and committed. If regenerating it produces a
       # different file, the committed copy is stale and the published package

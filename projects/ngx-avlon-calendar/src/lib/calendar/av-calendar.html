@@ -14,7 +14,14 @@
         [attr.aria-label]="prevLabel()"
         (click)="page(-1)"
       >
-        <svg viewBox="0 0 20 20" class="h-4 w-4" fill="none" stroke="currentColor" stroke-width="1.8" aria-hidden="true">
+        <svg
+          viewBox="0 0 20 20"
+          class="h-4 w-4"
+          fill="none"
+          stroke="currentColor"
+          stroke-width="1.8"
+          aria-hidden="true"
+        >
           <path d="M12.5 4.5 7 10l5.5 5.5" stroke-linecap="round" stroke-linejoin="round" />
         </svg>
       </button>
@@ -46,7 +53,14 @@
         [attr.aria-label]="nextLabel()"
         (click)="page(1)"
       >
-        <svg viewBox="0 0 20 20" class="h-4 w-4" fill="none" stroke="currentColor" stroke-width="1.8" aria-hidden="true">
+        <svg
+          viewBox="0 0 20 20"
+          class="h-4 w-4"
+          fill="none"
+          stroke="currentColor"
+          stroke-width="1.8"
+          aria-hidden="true"
+        >
           <path d="M7.5 4.5 13 10l-5.5 5.5" stroke-linecap="round" stroke-linejoin="round" />
         </svg>
       </button>
@@ -59,11 +73,7 @@
       @case ('days') {
         <div
           class="flex min-w-max items-start"
-          [class]="
-            monthCount() > 1
-              ? 'divide-x divide-[var(--av-divider)]'
-              : ''
-          "
+          [class]="monthCount() > 1 ? 'divide-x divide-[var(--av-divider)]' : ''"
         >
           @for (month of months(); track month.date.getTime()) {
             <div
@@ -92,7 +102,9 @@
                   <div
                     role="columnheader"
                     class="grid place-items-center pb-2 text-[0.68rem] font-semibold uppercase tracking-wider"
-                    [class]="header.weekend ? 'text-[var(--av-fg-subtle)]' : 'text-[var(--av-fg-muted)]'"
+                    [class]="
+                      header.weekend ? 'text-[var(--av-fg-subtle)]' : 'text-[var(--av-fg-muted)]'
+                    "
                     [attr.aria-label]="header.long"
                   >
                     <span aria-hidden="true">{{ header.narrow }}</span>
@@ -103,12 +115,18 @@
               @for (week of month.weeks; track week.days[0].time) {
                 <div role="row" class="grid" [style.grid-template-columns]="gridTemplate()">
                   @if (showWeekNumbers()) {
-                    <div class="grid place-items-center text-[0.7rem] tabular-nums text-[var(--av-fg-subtle)]">
+                    <div
+                      class="grid place-items-center text-[0.7rem] tabular-nums text-[var(--av-fg-subtle)]"
+                    >
                       {{ week.weekNumber }}
                     </div>
                   }
                   @for (cell of week.days; track cell.time) {
-                    <div role="gridcell" [attr.aria-selected]="cell.selected" class="grid place-items-center p-px">
+                    <div
+                      role="gridcell"
+                      [attr.aria-selected]="cell.selected"
+                      class="grid place-items-center p-px"
+                    >
                       @if (cell.outside && !showOutsideDays()) {
                         <span [class]="cellSize()" aria-hidden="true"></span>
                       } @else {
@@ -143,7 +161,12 @@
       }
 
       @case ('months') {
-        <div class="grid grid-cols-3 gap-1.5 py-1" [class]="animate" role="grid" aria-label="Choose a month">
+        <div
+          class="grid grid-cols-3 gap-1.5 py-1"
+          [class]="animate"
+          role="grid"
+          aria-label="Choose a month"
+        >
           @for (choice of monthChoices(); track choice.value) {
             <button
               type="button"
@@ -163,7 +186,12 @@
       }
 
       @case ('years') {
-        <div class="grid grid-cols-4 gap-1.5 py-1" [class]="animate" role="grid" aria-label="Choose a year">
+        <div
+          class="grid grid-cols-4 gap-1.5 py-1"
+          [class]="animate"
+          role="grid"
+          aria-label="Choose a year"
+        >
           @for (choice of yearChoices(); track choice.value) {
             <button
               type="button"
@@ -186,7 +214,9 @@
 
   <!-- Footer ------------------------------------------------------- -->
   @if (showFooter()) {
-    <div class="mt-3 flex items-center justify-between gap-2 border-t border-[var(--av-divider)] pt-3">
+    <div
+      class="mt-3 flex items-center justify-between gap-2 border-t border-[var(--av-divider)] pt-3"
+    >
       <button
         type="button"
         class="av-cell av-focus-ring px-2.5 py-1.5 text-[0.8rem] font-semibold text-[var(--av-accent)] hover:bg-[var(--av-accent-soft)] disabled:pointer-events-none disabled:text-[var(--av-disabled-fg)]"

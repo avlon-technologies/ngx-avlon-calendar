@@ -9,7 +9,7 @@
     "build:lib": "ng build ngx-avlon-calendar",
     "watch": "ng build ngx-avlon-calendar --watch --configuration development",
     "test": "ng test ngx-avlon-calendar --no-watch",
-    "format": "prettier --write \"projects/**/*.{ts,html,css,json,md}\"",
+    "format": "prettier --write .",
     "test:demo": "ng test demo --no-watch",
     "test:all": "npm run test && npm run test:demo",
     "pack:lib": "npm run build:lib && cd dist/ngx-avlon-calendar && npm pack",
@@ -20,7 +20,8 @@
     "styles:check": "node scripts/build-lib-css.mjs && git diff --exit-code -- projects/ngx-avlon-calendar/src/lib/styles/av-styles.css",
     "prebuild:lib": "npm run styles",
     "pretest": "npm run styles",
-    "prestart": "npm run styles"
+    "prestart": "npm run styles",
+    "format:check": "prettier --check ."
   },
   "private": true,
   "packageManager": "npm@11.16.0",

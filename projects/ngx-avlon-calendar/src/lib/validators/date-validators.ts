@@ -78,11 +78,7 @@ export function avDateValid(valueFormat = 'yyyy-MM-dd'): ValidatorFn {
  * The error lands on the group as `avDateRange` and on the end control as
  * `avDateMin`, so a picker bound to the end control shows it without extra work.
  */
-export function avDateRange(
-  startKey: string,
-  endKey: string,
-  valueFormat?: string,
-): ValidatorFn {
+export function avDateRange(startKey: string, endKey: string, valueFormat?: string): ValidatorFn {
   return (group: AbstractControl): ValidationErrors | null => {
     const startControl = group.get(startKey);
     const endControl = group.get(endKey);

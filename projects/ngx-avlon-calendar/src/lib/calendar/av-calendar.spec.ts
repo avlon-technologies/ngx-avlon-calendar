@@ -373,8 +373,7 @@ describe('footer', () => {
     await settle();
 
     const clearButton = all('button').find((b) => b.textContent?.trim() === 'Clear') as
-      | HTMLButtonElement
-      | undefined;
+      HTMLButtonElement | undefined;
     expect(clearButton?.disabled).toBe(false);
     clearButton!.click();
     await settle();
@@ -383,8 +382,7 @@ describe('footer', () => {
 
   it('disables Clear when there is nothing to clear', () => {
     const clearButton = all('button').find((b) => b.textContent?.trim() === 'Clear') as
-      | HTMLButtonElement
-      | undefined;
+      HTMLButtonElement | undefined;
     expect(clearButton?.disabled).toBe(true);
   });
 });

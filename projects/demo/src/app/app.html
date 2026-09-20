@@ -5,7 +5,13 @@
   <div class="mx-auto flex max-w-7xl items-center gap-4 px-6 py-3">
     <div class="flex items-center gap-2.5">
       <span class="grid h-8 w-8 place-items-center rounded-lg bg-indigo-600 text-white">
-        <svg viewBox="0 0 20 20" class="h-4.5 w-4.5" fill="none" stroke="currentColor" stroke-width="1.6">
+        <svg
+          viewBox="0 0 20 20"
+          class="h-4.5 w-4.5"
+          fill="none"
+          stroke="currentColor"
+          stroke-width="1.6"
+        >
           <rect x="2.75" y="4.25" width="14.5" height="13" rx="2.5" />
           <path d="M2.75 8.25h14.5M6.75 2.75v3M13.25 2.75v3" stroke-linecap="round" />
           <circle cx="10" cy="12.5" r="1.15" fill="currentColor" stroke="none" />
@@ -51,7 +57,9 @@
 <section class="border-b border-slate-200 dark:border-slate-800">
   <div class="mx-auto grid max-w-7xl gap-10 px-6 py-16 lg:grid-cols-[minmax(0,1fr)_26rem] lg:py-24">
     <div>
-      <p class="text-[0.75rem] font-semibold uppercase tracking-[0.18em] text-indigo-600 dark:text-indigo-400">
+      <p
+        class="text-[0.75rem] font-semibold uppercase tracking-[0.18em] text-indigo-600 dark:text-indigo-400"
+      >
         Angular date picker
       </p>
       <h1 class="mt-3 text-4xl font-semibold tracking-tight sm:text-5xl">
@@ -65,14 +73,19 @@
       </p>
 
       <dl class="mt-8 grid max-w-xl grid-cols-2 gap-x-8 gap-y-4 sm:grid-cols-4">
-        @for (stat of [
-          { k: 'Themes shipped', v: '6' },
-          { k: 'Peer deps', v: 'CDK only' },
-          { k: 'Prebuilt CSS', v: '41 kB' },
-          { k: 'Forms support', v: 'All three' }
-        ]; track stat.k) {
+        @for (
+          stat of [
+            { k: 'Themes shipped', v: '6' },
+            { k: 'Peer deps', v: 'CDK only' },
+            { k: 'Prebuilt CSS', v: '41 kB' },
+            { k: 'Forms support', v: 'All three' },
+          ];
+          track stat.k
+        ) {
           <div>
-            <dt class="text-[0.7rem] font-medium uppercase tracking-wider text-slate-500">{{ stat.k }}</dt>
+            <dt class="text-[0.7rem] font-medium uppercase tracking-wider text-slate-500">
+              {{ stat.k }}
+            </dt>
             <dd class="mt-0.5 text-sm font-semibold">{{ stat.v }}</dd>
           </div>
         }
@@ -91,14 +104,16 @@
           [clearable]="true"
           hint="Type it, or open the calendar. Both work."
         />
-        <p class="mt-5 border-t border-rose-200/70 pt-4 font-mono text-[0.72rem] text-rose-900/70 dark:border-slate-800 dark:text-slate-400">
+        <p
+          class="mt-5 border-t border-rose-200/70 pt-4 font-mono text-[0.72rem] text-rose-900/70 dark:border-slate-800 dark:text-slate-400"
+        >
           {{ heroLabel() }}
         </p>
       </div>
 
       <pre
         class="overflow-x-auto rounded-2xl bg-slate-900 p-5 font-mono text-[0.72rem] leading-relaxed text-slate-300"
-      >{{ heroCode }}</pre>
+        >{{ heroCode }}</pre>
     </div>
   </div>
 </section>
@@ -145,28 +160,31 @@
     </header>
 
     <div class="grid gap-6 md:grid-cols-2">
-      @for (group of [
-        {
-          title: 'In the text field',
-          rows: [
-            ['Digits', 'Fill the fields left to right, separators appear on their own'],
-            ['Arrow up / down', 'Step the field under the caret, wrapping months and days'],
-            ['Backspace', 'Always removes a digit, never stalls on a separator'],
-            ['Alt + arrow down', 'Open the calendar'],
-            ['Escape', 'Close the calendar and keep focus in the field']
-          ]
-        },
-        {
-          title: 'In the calendar',
-          rows: [
-            ['Arrow keys', 'Move by a day, or a week vertically'],
-            ['Home / End', 'First and last day of the week'],
-            ['Page up / down', 'Previous and next month'],
-            ['Shift + page up / down', 'Previous and next year'],
-            ['Enter or Space', 'Select the focused day']
-          ]
-        }
-      ]; track group.title) {
+      @for (
+        group of [
+          {
+            title: 'In the text field',
+            rows: [
+              ['Digits', 'Fill the fields left to right, separators appear on their own'],
+              ['Arrow up / down', 'Step the field under the caret, wrapping months and days'],
+              ['Backspace', 'Always removes a digit, never stalls on a separator'],
+              ['Alt + arrow down', 'Open the calendar'],
+              ['Escape', 'Close the calendar and keep focus in the field'],
+            ],
+          },
+          {
+            title: 'In the calendar',
+            rows: [
+              ['Arrow keys', 'Move by a day, or a week vertically'],
+              ['Home / End', 'First and last day of the week'],
+              ['Page up / down', 'Previous and next month'],
+              ['Shift + page up / down', 'Previous and next year'],
+              ['Enter or Space', 'Select the focused day'],
+            ],
+          },
+        ];
+        track group.title
+      ) {
         <div class="rounded-2xl border border-slate-200 p-5 dark:border-slate-800">
           <h3 class="mb-3 text-sm font-semibold">{{ group.title }}</h3>
           <dl class="space-y-2">

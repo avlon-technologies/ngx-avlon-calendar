@@ -352,14 +352,17 @@ export class AvCalendar {
 
   protected readonly prevLabel = computed(() => {
     const view = this.view();
-    return view === 'days' ? 'Previous month' : view === 'months' ? 'Previous year' : 'Earlier years';
+    return view === 'days'
+      ? 'Previous month'
+      : view === 'months'
+        ? 'Previous year'
+        : 'Earlier years';
   });
 
   protected readonly nextLabel = computed(() => {
     const view = this.view();
     return view === 'days' ? 'Next month' : view === 'months' ? 'Next year' : 'Later years';
   });
-
 
   protected readonly cellText = computed(() => {
     switch (this.size()) {
@@ -391,15 +394,32 @@ export class AvCalendar {
    * containing a space, which quietly loses every multi-class utility group.
    */
   protected dayClasses(cell: AvDayCell): string {
-    const parts = ['av-cell', 'av-focus-ring', 'relative', 'grid', 'place-items-center', 'font-medium', 'tabular-nums'];
+    const parts = [
+      'av-cell',
+      'av-focus-ring',
+      'relative',
+      'grid',
+      'place-items-center',
+      'font-medium',
+      'tabular-nums',
+    ];
     parts.push(this.cellSize(), this.cellText());
 
     if (cell.selected) {
-      parts.push('bg-[var(--av-accent)]', 'text-[var(--av-accent-fg)]', 'font-semibold', 'shadow-sm');
+      parts.push(
+        'bg-[var(--av-accent)]',
+        'text-[var(--av-accent-fg)]',
+        'font-semibold',
+        'shadow-sm',
+      );
     } else if (cell.disabled) {
       parts.push('text-[var(--av-disabled-fg)]', 'line-through', 'decoration-[1.5px]');
     } else if (cell.outside) {
-      parts.push('text-[var(--av-fg-subtle)]', 'hover:bg-[var(--av-surface-hover)]', 'hover:text-[var(--av-fg-muted)]');
+      parts.push(
+        'text-[var(--av-fg-subtle)]',
+        'hover:bg-[var(--av-surface-hover)]',
+        'hover:text-[var(--av-fg-muted)]',
+      );
     } else {
       parts.push('text-[var(--av-fg)]', 'hover:bg-[var(--av-accent-soft)]');
     }
@@ -726,7 +746,8 @@ export class AvCalendar {
 
     const lastVisible = addMonths(anchor, this.monthCount() - 1);
     const offScreen =
-      compareDays(target, startOfMonth(anchor)) < 0 || compareDays(target, endOfMonth(lastVisible)) > 0;
+      compareDays(target, startOfMonth(anchor)) < 0 ||
+      compareDays(target, endOfMonth(lastVisible)) > 0;
 
     if (offScreen) {
       this.setAnchor(startOfMonth(target), compareDays(target, anchor) < 0 ? 'prev' : 'next');

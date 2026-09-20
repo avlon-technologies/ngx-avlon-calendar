@@ -72,7 +72,11 @@ export function startOfMonth(date: Date): Date {
 }
 
 export function endOfMonth(date: Date): Date {
-  return makeDate(date.getFullYear(), date.getMonth(), daysInMonth(date.getFullYear(), date.getMonth()));
+  return makeDate(
+    date.getFullYear(),
+    date.getMonth(),
+    daysInMonth(date.getFullYear(), date.getMonth()),
+  );
 }
 
 /** Number of days in the given zero-based month. */

@@ -488,7 +488,11 @@ export class AvDatePicker implements ControlValueAccessor, Validator, DoCheck, O
         return [
           base,
           'border border-transparent bg-[var(--av-surface-sunken)]',
-          invalid ? 'border-[var(--av-danger-border)] bg-[var(--av-danger-soft)]' : focused ? 'border-[var(--av-accent)]' : '',
+          invalid
+            ? 'border-[var(--av-danger-border)] bg-[var(--av-danger-soft)]'
+            : focused
+              ? 'border-[var(--av-accent)]'
+              : '',
           ring,
           disabled ? 'opacity-60' : '',
         ].join(' ');
@@ -503,7 +507,9 @@ export class AvDatePicker implements ControlValueAccessor, Validator, DoCheck, O
         return [
           base,
           'border border-transparent bg-transparent shadow-none',
-          focused ? 'bg-[var(--av-surface)] border-[var(--av-border)]' : 'hover:bg-[var(--av-surface-hover)]',
+          focused
+            ? 'bg-[var(--av-surface)] border-[var(--av-border)]'
+            : 'hover:bg-[var(--av-surface-hover)]',
           invalid ? 'border-[var(--av-danger-border)]' : '',
           ring,
           disabled ? 'opacity-60' : '',

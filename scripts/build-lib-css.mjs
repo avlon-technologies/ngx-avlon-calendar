@@ -137,7 +137,6 @@ utilities = pruneUnusedThemeVars(utilities, tokens);
 const saved = ((prunedBytes - Buffer.byteLength(utilities)) / 1024).toFixed(1);
 if (Number(saved) > 0) console.log(`[build-lib-css] pruned ${saved} kB of unused theme variables`);
 
-
 const banner = `/*!
  * ngx-avlon-calendar - generated stylesheet. DO NOT EDIT.
  *

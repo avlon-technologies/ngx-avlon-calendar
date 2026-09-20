@@ -34,9 +34,9 @@ import {
         <div class="space-y-4">
           @for (format of formats; track format) {
             <div class="flex items-center gap-4">
-              <code
-                class="w-28 shrink-0 font-mono text-[0.72rem] text-slate-500"
-              >{{ format }}</code>
+              <code class="w-28 shrink-0 font-mono text-[0.72rem] text-slate-500">{{
+                format
+              }}</code>
               <div class="min-w-0 flex-1">
                 <av-date-picker
                   [displayFormat]="format"
@@ -59,24 +59,29 @@ import {
 
         <p class="mt-4 text-[0.72rem] leading-relaxed text-slate-500">
           A format is masked when every field is fixed-width and numeric. A month name or an
-          unpadded number cannot be masked without guessing, so those fields fall back to free
-          text that is parsed when you leave them. All six share one value.
+          unpadded number cannot be masked without guessing, so those fields fall back to free text
+          that is parsed when you leave them. All six share one value.
         </p>
       </section>
 
       <!-- Parser --------------------------------------------------- -->
       <section class="rounded-2xl border border-slate-200 p-5 dark:border-slate-800">
-        <h3 class="text-sm font-semibold text-slate-900 dark:text-slate-50">What the parser accepts</h3>
+        <h3 class="text-sm font-semibold text-slate-900 dark:text-slate-50">
+          What the parser accepts
+        </h3>
         <p class="mt-0.5 mb-4 text-[0.75rem] text-slate-500">
           Live, against <code class="font-mono">MM/dd/yyyy</code>.
         </p>
 
         <div class="space-y-1.5">
           @for (sample of samples(); track sample.text) {
-            <div class="flex items-center gap-3 rounded-lg bg-slate-50 px-3 py-1.5 dark:bg-slate-900">
-              <code class="w-40 shrink-0 font-mono text-[0.72rem] text-slate-700 dark:text-slate-300">{{
-                sample.text
-              }}</code>
+            <div
+              class="flex items-center gap-3 rounded-lg bg-slate-50 px-3 py-1.5 dark:bg-slate-900"
+            >
+              <code
+                class="w-40 shrink-0 font-mono text-[0.72rem] text-slate-700 dark:text-slate-300"
+                >{{ sample.text }}</code
+              >
               <span
                 class="text-[0.72rem]"
                 [class]="sample.ok ? 'text-emerald-600' : 'text-rose-600'"
@@ -110,8 +115,8 @@ import {
         </h3>
         <p class="mt-0.5 mb-4 text-[0.75rem] leading-relaxed text-slate-500">
           Most APIs do not want a <code class="font-mono">Date</code>. Rather than make every form
-          write a mapping layer on both sides,
-          <code class="font-mono">valueMode</code> decides the shape up front.
+          write a mapping layer on both sides, <code class="font-mono">valueMode</code> decides the
+          shape up front.
         </p>
 
         <div class="flex flex-wrap gap-1.5">
@@ -139,7 +144,9 @@ import {
             label="Pick a date"
             [clearable]="true"
           />
-          <div class="rounded-lg bg-slate-900 p-4 font-mono text-[0.72rem] leading-relaxed text-slate-300">
+          <div
+            class="rounded-lg bg-slate-900 p-4 font-mono text-[0.72rem] leading-relaxed text-slate-300"
+          >
             <div class="text-slate-500">emitted to the control</div>
             <div class="mt-1 break-all text-emerald-400">{{ emitted() }}</div>
             <div class="mt-3 text-slate-500">typeof</div>

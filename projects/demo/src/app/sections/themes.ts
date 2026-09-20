@@ -76,7 +76,8 @@ interface ThemeCard {
           <footer class="px-5 pb-5">
             <code
               class="block rounded-lg bg-slate-900/90 px-2.5 py-1.5 font-mono text-[0.68rem] text-slate-300"
-            >theme="{{ card.className }}"</code>
+              >theme="{{ card.className }}"</code
+            >
           </footer>
         </article>
       }
@@ -111,7 +112,7 @@ interface ThemeCard {
         <footer class="px-5 pb-5">
           <pre
             class="overflow-x-auto rounded-lg bg-slate-900/90 px-2.5 py-2 font-mono text-[0.66rem] leading-relaxed text-slate-300"
-          >{{ customThemeSource }}</pre>
+            >{{ customThemeSource }}</pre>
         </footer>
       </article>
     </div>

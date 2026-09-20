@@ -386,9 +386,7 @@ function renderToken(token: AvFormatToken, date: Date, names: AvDateNames): stri
   switch (token.raw[0]) {
     case 'y': {
       const year = date.getFullYear();
-      return run === 2
-        ? String(year % 100).padStart(2, '0')
-        : String(year).padStart(run, '0');
+      return run === 2 ? String(year % 100).padStart(2, '0') : String(year).padStart(run, '0');
     }
     case 'M': {
       if (run >= 4) return names.monthsLong[date.getMonth()]!;

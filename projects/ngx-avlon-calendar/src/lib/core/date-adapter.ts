@@ -126,7 +126,9 @@ export function detectFirstDayOfWeek(locale: string): number {
   try {
     const info = new Intl.Locale(locale) as unknown as WeekInfoCapable;
     const firstDay =
-      typeof info.getWeekInfo === 'function' ? info.getWeekInfo().firstDay : info.weekInfo?.firstDay;
+      typeof info.getWeekInfo === 'function'
+        ? info.getWeekInfo().firstDay
+        : info.weekInfo?.firstDay;
     if (typeof firstDay === 'number') return firstDay % 7;
   } catch {
     // Older runtimes have no week info; Sunday is the safest default.

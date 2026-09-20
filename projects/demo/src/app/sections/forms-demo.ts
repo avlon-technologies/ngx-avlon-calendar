@@ -69,7 +69,9 @@ import { AvDatePicker, addDays, avDateRange, today } from '@avlon/ngx-avlon-cale
           </button>
         </form>
 
-        <div class="mt-4 rounded-lg bg-slate-900 p-3 font-mono text-[0.7rem] leading-relaxed text-slate-300">
+        <div
+          class="mt-4 rounded-lg bg-slate-900 p-3 font-mono text-[0.7rem] leading-relaxed text-slate-300"
+        >
           <div class="text-slate-500">value</div>
           <pre class="overflow-x-auto">{{ trip.value | json }}</pre>
           <div class="mt-2 text-slate-500">status</div>
@@ -113,7 +115,9 @@ import { AvDatePicker, addDays, avDateRange, today } from '@avlon/ngx-avlon-cale
           />
         </form>
 
-        <div class="mt-4 rounded-lg bg-slate-900 p-3 font-mono text-[0.7rem] leading-relaxed text-slate-300">
+        <div
+          class="mt-4 rounded-lg bg-slate-900 p-3 font-mono text-[0.7rem] leading-relaxed text-slate-300"
+        >
           <div class="text-slate-500">due</div>
           <div>{{ due ? due.toDateString() : 'null' }}</div>
           <div class="mt-2 text-slate-500">reminder</div>
@@ -159,7 +163,9 @@ import { AvDatePicker, addDays, avDateRange, today } from '@avlon/ngx-avlon-cale
           </button>
         </div>
 
-        <div class="mt-4 rounded-lg bg-slate-900 p-3 font-mono text-[0.7rem] leading-relaxed text-slate-300">
+        <div
+          class="mt-4 rounded-lg bg-slate-900 p-3 font-mono text-[0.7rem] leading-relaxed text-slate-300"
+        >
           <div class="text-slate-500">range</div>
           <div>{{ rangeLabel() }}</div>
         </div>

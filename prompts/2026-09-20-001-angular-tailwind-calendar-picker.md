@@ -21,7 +21,7 @@ support for both reactive and template-driven forms, and a themable calendar.
 
 ## Original Prompt
 
-> let's design and implement an angular calendar picker, using tailwindcss. It should do proper input masking (based on date format), and date validation, support for different presentation options (i.e. little calendar icon to right or left).  Input allows you to enter a date - validation errors would be displayed.  Supports reactive forms, and non-reactive forms. calendar is themable.  Claim to fame, will be aesethetics and flexibility.
+> let's design and implement an angular calendar picker, using tailwindcss. It should do proper input masking (based on date format), and date validation, support for different presentation options (i.e. little calendar icon to right or left). Input allows you to enter a date - validation errors would be displayed. Supports reactive forms, and non-reactive forms. calendar is themable. Claim to fame, will be aesethetics and flexibility.
 
 ## Expected Outputs
 

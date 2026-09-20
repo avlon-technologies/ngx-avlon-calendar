@@ -8,12 +8,7 @@
 
 // Components and directives
 export { AvCalendar } from './lib/calendar/av-calendar';
-export type {
-  AvChoiceCell,
-  AvDayCell,
-  AvMonthModel,
-  AvWeekRow,
-} from './lib/calendar/av-calendar';
+export type { AvChoiceCell, AvDayCell, AvMonthModel, AvWeekRow } from './lib/calendar/av-calendar';
 export { AvDatePicker } from './lib/datepicker/av-date-picker';
 export { AvDateMask } from './lib/datepicker/av-date-mask.directive';
 

@@ -2,9 +2,7 @@
   "mcpServers": {
     "continuum": {
       "command": "node",
-      "args": [
-        "C:/projects/avlon/continuum/tools/mcp-server.mjs"
-      ]
+      "args": ["C:/projects/avlon/continuum/tools/mcp-server.mjs"]
     }
   }
 }

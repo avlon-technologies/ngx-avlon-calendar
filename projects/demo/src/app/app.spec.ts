@@ -85,9 +85,7 @@ describe('the demo page', () => {
 
   it('gives every picker input a placeholder derived from its format', () => {
     const placeholders = new Set(
-      (all('av-date-picker input') as HTMLInputElement[])
-        .map((i) => i.placeholder)
-        .filter(Boolean),
+      (all('av-date-picker input') as HTMLInputElement[]).map((i) => i.placeholder).filter(Boolean),
     );
     expect(placeholders.has('mm/dd/yyyy')).toBe(true);
     expect(placeholders.has('dd.mm.yyyy')).toBe(true);
@@ -249,12 +247,12 @@ describe('forms section', () => {
   });
 
   it('fills the formless range from a button', async () => {
-    const button = all('#forms button').find(
-      (b) => b.textContent?.trim() === 'Set to this month',
-    );
+    const button = all('#forms button').find((b) => b.textContent?.trim() === 'Set to this month');
     button!.click();
     await settle();
-    const readout = all('#forms .font-mono').map((d) => d.textContent ?? '').join(' ');
+    const readout = all('#forms .font-mono')
+      .map((d) => d.textContent ?? '')
+      .join(' ');
     expect(readout).toContain(' to ');
   });
 });
@@ -355,9 +353,7 @@ describe('calendar section', () => {
 
 describe('dark mode', () => {
   it('toggles the class the themes key off', async () => {
-    const toggle = all('button').find((b) =>
-      b.getAttribute('aria-label')?.startsWith('Switch to'),
-    );
+    const toggle = all('button').find((b) => b.getAttribute('aria-label')?.startsWith('Switch to'));
     expect(toggle).toBeTruthy();
 
     const before = document.documentElement.classList.contains('dark');

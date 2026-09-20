@@ -1,5 +1,15 @@
-import { InjectionToken, type EnvironmentProviders, type Provider, makeEnvironmentProviders } from '@angular/core';
-import { AV_DATE_LOCALE, AV_FIRST_DAY_OF_WEEK, AvDateAdapter, AvNativeDateAdapter } from './date-adapter';
+import {
+  InjectionToken,
+  type EnvironmentProviders,
+  type Provider,
+  makeEnvironmentProviders,
+} from '@angular/core';
+import {
+  AV_DATE_LOCALE,
+  AV_FIRST_DAY_OF_WEEK,
+  AvDateAdapter,
+  AvNativeDateAdapter,
+} from './date-adapter';
 import type {
   AvErrorMessages,
   AvFieldVariant,
