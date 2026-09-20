@@ -22,7 +22,8 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        node: ['20', '22', '24']
+        # Angular 22 requires Node 22.22.3+, 24.15+ or 26.
+        node: ['22', '24']
 
     steps:
       - uses: actions/checkout@v4

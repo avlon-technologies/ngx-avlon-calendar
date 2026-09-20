@@ -882,6 +882,47 @@
   box-sizing: border-box;
 }
 
+/*
+ * A reset for the elements this component renders, and only those.
+ *
+ * Shadow encapsulation cuts both ways: the host page's reset cannot reach in
+ * either, so without this the browser's default button chrome shows through
+ * and every day cell gains an outset border. This is scoped to the shadow root,
+ * so it is not a global reset by another name.
+ */
+:host button,
+:host input {
+  margin: 0;
+  padding: 0;
+  border: 0;
+  background: none;
+  font: inherit;
+  color: inherit;
+  letter-spacing: inherit;
+  text-align: inherit;
+  appearance: none;
+  -webkit-appearance: none;
+}
+
+:host button {
+  cursor: pointer;
+  text-transform: none;
+}
+
+:host button:disabled {
+  cursor: default;
+}
+
+:host input::-webkit-outer-spin-button,
+:host input::-webkit-inner-spin-button {
+  appearance: none;
+  margin: 0;
+}
+
+:host svg {
+  display: block;
+}
+
 /* A standalone calendar paints its own surface, so dropping one into a page
    needs no wrapper. The host element itself stays in the light DOM, so a
    consumer can still give it a border or a shadow from their own stylesheet. */

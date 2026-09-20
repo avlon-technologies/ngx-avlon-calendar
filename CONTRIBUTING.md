@@ -13,7 +13,7 @@ npm run build:lib     # the demo imports the built package from dist/
 npm start             # serves the demo at http://localhost:4200
 ```
 
-Node 20 or newer.
+Node 22.22.3 or newer, as required by Angular 22.
 
 The demo resolves `@avlon/ngx-avlon-calendar` to `dist/ngx-avlon-calendar`, so
 it exercises the packaged output rather than the source tree. Build the library
