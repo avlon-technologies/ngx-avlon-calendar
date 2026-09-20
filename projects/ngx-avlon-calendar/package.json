@@ -25,5 +25,8 @@
   "dependencies": {
     "tslib": "^2.3.0"
   },
-  "author": "Avlon"
+  "author": "Avlon",
+  "publishConfig": {
+    "access": "public"
+  }
 }
