@@ -89,11 +89,29 @@ jobs:
             exit 1
           }
 
+      # Checks for Preflight's own signatures rather than for any rule with a
+      # broad selector. Tailwind emits a `*, ::before, ::after, ::backdrop`
+      # block that declares only `--tw-*` custom properties, which sets no real
+      # property on anything and is required for transforms and shadows to work.
       - name: Assert the component styles carry no Preflight
         run: |
           css=projects/ngx-avlon-calendar/src/lib/styles/av-styles.css
-          if grep -qE '^\s*(html|body|\*,)' "$css"; then
-            echo "::error::$css appears to contain a global reset"
+          for marker in 'text-size-adjust' 'abbr:where' 'tab-size' '^html' '^body'; do
+            if grep -qE -- "$marker" "$css"; then
+              echo "::error::$css matches Preflight signature: $marker"
+              exit 1
+            fi
+          done
+          echo "No Preflight signatures found."
+
+      # The reset the components do carry must stay below utility classes, or a
+      # bare element selector silently beats `bg-[var(--av-accent)]` and the
+      # selected day loses its fill.
+      - name: Assert the scoped reset is not raised above class specificity
+        run: |
+          css=projects/ngx-avlon-calendar/src/lib/styles/av-styles.css
+          if grep -qE '^\s*:host (button|input|svg)' "$css"; then
+            echo "::error::The element reset is qualified with :host, which outranks utility classes"
             exit 1
           fi
 
