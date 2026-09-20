@@ -1,0 +1,8 @@
+# The generated stylesheet IS committed: both components load it as a component
+# stylesheet, so the build and the IDE both need it present. CI regenerates it
+# and fails if it has drifted (npm run styles:check).
+!av-styles.css
+
+# Scratch files from the generator.
+.entry.css
+.raw.css

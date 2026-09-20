@@ -3,6 +3,7 @@ import { ComponentFixture, TestBed } from '@angular/core/testing';
 import { beforeEach, describe, expect, it } from 'vitest';
 import { AvCalendar } from './av-calendar';
 import { addDays, isSameDay, makeDate } from '../core/date-utils';
+import { deepQuery, deepQueryAll } from '../testing/deep-query';
 import type { AvDateFilter } from '../core/types';
 
 @Component({
@@ -53,13 +54,13 @@ async function settle(): Promise<void> {
 }
 
 function el(selector: string): HTMLElement {
-  const node = fixture.nativeElement.querySelector(selector);
+  const node = deepQuery(fixture.nativeElement, selector);
   expect(node, `expected to find ${selector}`).toBeTruthy();
   return node as HTMLElement;
 }
 
 function all(selector: string): HTMLElement[] {
-  return Array.from(fixture.nativeElement.querySelectorAll(selector));
+  return deepQueryAll(fixture.nativeElement, selector);
 }
 
 /** Every day button, in grid order. */

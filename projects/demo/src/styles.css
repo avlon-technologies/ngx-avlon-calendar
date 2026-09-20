@@ -1,13 +1,13 @@
 @import 'tailwindcss';
-@import '../../../dist/ngx-avlon-calendar/styles/theme.css';
-
-/* The demo develops against the library's source, so Tailwind has to see its
-   templates. A consumer installing from npm points this at the package instead,
-   or skips it entirely and imports the prebuilt stylesheet. */
-@source '../../ngx-avlon-calendar/src';
 
 /* Class-based dark mode, so the demo can toggle it without touching the OS. */
 @custom-variant dark (&:where(.dark, .dark *));
+
+/*
+ * Note what is NOT here: the library ships no stylesheet to import and needs no
+ * Tailwind configuration. Both of its components render into a shadow root and
+ * carry their own styles, so this file is the demo's own CSS and nothing else.
+ */
 
 :root {
   color-scheme: light;
@@ -24,7 +24,14 @@ body {
   -webkit-font-smoothing: antialiased;
 }
 
-/* A checkerboard so the glass theme has something to be translucent against. */
+/* A framed surface for the calendars shown inline. The host element lives in
+   the light DOM, so it can be styled from here even though its internals cannot. */
+av-calendar {
+  border: 1px solid color-mix(in oklab, currentColor 12%, transparent);
+  box-shadow: 0 1px 2px rgb(15 23 42 / 0.05);
+}
+
+/* A backdrop so the glass theme has something to be translucent against. */
 .demo-glass-bed {
   background-image:
     radial-gradient(at 18% 22%, rgb(99 102 241 / 0.55) 0px, transparent 55%),
@@ -33,9 +40,14 @@ body {
     linear-gradient(135deg, #1e1b4b, #0f172a);
 }
 
-/* A theme authored entirely in the consuming app: no library change, no
-   selector overrides, just the token contract. */
-.demo-theme-citrus {
+/*
+ * A theme authored entirely here in the consuming application. Custom
+ * properties inherit through a shadow boundary, so setting them on an ancestor
+ * is all it takes - no library change, no selector overrides.
+ */
+.demo-theme-citrus,
+av-calendar.demo-theme-citrus,
+av-date-picker.demo-theme-citrus {
   --av-radius-field: 0.75rem;
   --av-radius-panel: 1rem;
   --av-radius-cell: 999px;
@@ -55,7 +67,4 @@ body {
   --av-accent-fg: #ffffff;
   --av-accent-soft: #ffedd5;
   --av-disabled-fg: #ddc9a4;
-  --av-shadow-panel:
-    0 1px 2px rgb(120 60 10 / 0.06),
-    0 16px 40px -12px rgb(180 100 20 / 0.28);
 }

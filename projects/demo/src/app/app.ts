@@ -1,5 +1,5 @@
 import { ChangeDetectionStrategy, Component, computed, effect, signal } from '@angular/core';
-import { AvDatePicker } from 'ngx-avlon-calendar';
+import { AvDatePicker } from '@avlon/ngx-avlon-calendar';
 import { CalendarDemo } from './sections/calendar-demo';
 import { FormsDemo } from './sections/forms-demo';
 import { MaskingDemo } from './sections/masking-demo';

@@ -12,6 +12,7 @@ import {
   signal,
   untracked,
   viewChild,
+  ViewEncapsulation,
   type TemplateRef,
 } from '@angular/core';
 import { NgTemplateOutlet } from '@angular/common';
@@ -94,6 +95,8 @@ const YEARS_PER_PAGE = 24;
   templateUrl: './av-calendar.html',
   changeDetection: ChangeDetectionStrategy.OnPush,
   imports: [NgTemplateOutlet],
+  encapsulation: ViewEncapsulation.ShadowDom,
+  styleUrl: '../styles/av-styles.css',
   host: {
     '[class]': 'hostClasses()',
     '(keydown)': 'onKeydown($event)',
@@ -212,11 +215,35 @@ export class AvCalendar {
 
   protected readonly monthCount = computed(() => Math.max(1, Math.trunc(this.numberOfMonths())));
 
+  /**
+   * Classes on the host element.
+   *
+   * The theme class has to live here rather than inside the shadow root,
+   * because `:host(.av-theme-rose)` is how the stylesheet selects a theme and
+   * custom properties are the only thing that crosses the boundary.
+   */
   protected readonly hostClasses = computed(() =>
-    // `block` matters: an unknown element is inline by default, which would
-    // collapse the grid the moment someone drops the calendar into a flex row.
-    ['av-calendar', 'av-theme', 'block', this.theme() ?? this.defaults.theme].join(' '),
+    ['av-calendar', this.theme() ?? this.defaults.theme].join(' '),
   );
+
+  /** Minimum width of a day cell, so tracks never collapse under the content. */
+  protected readonly cellTrack = computed(() => {
+    switch (this.size()) {
+      case 'sm':
+        return '2rem';
+      case 'lg':
+        return '2.75rem';
+      default:
+        return '2.375rem';
+    }
+  });
+
+  /** Grid template for a week row, honouring the optional week-number column. */
+  protected readonly gridTemplate = computed(() => {
+    const track = `minmax(${this.cellTrack()}, 1fr)`;
+    const days = `repeat(7, ${track})`;
+    return this.showWeekNumbers() ? `minmax(1.75rem, auto) ${days}` : days;
+  });
 
   /** Weekday column headers, rotated to the configured first day of week. */
   protected readonly weekdayHeaders = computed(() => {
@@ -333,7 +360,6 @@ export class AvCalendar {
     return view === 'days' ? 'Next month' : view === 'months' ? 'Next year' : 'Later years';
   });
 
-  protected readonly gridColumns = computed(() => (this.showWeekNumbers() ? 8 : 7));
 
   protected readonly cellText = computed(() => {
     switch (this.size()) {

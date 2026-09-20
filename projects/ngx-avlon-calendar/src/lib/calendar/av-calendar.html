@@ -6,7 +6,7 @@
   @if (headerTemplate()) {
     <ng-container [ngTemplateOutlet]="headerTemplate()!" />
   } @else {
-    <div class="mb-2 flex items-center gap-1">
+    <div class="mb-3 flex items-center gap-1">
       <button
         type="button"
         class="av-cell av-focus-ring grid h-8 w-8 shrink-0 place-items-center text-[var(--av-fg-muted)] hover:bg-[var(--av-surface-hover)] hover:text-[var(--av-fg)] disabled:pointer-events-none disabled:text-[var(--av-disabled-fg)]"
@@ -57,20 +57,32 @@
   <div #grid>
     @switch (view()) {
       @case ('days') {
-        <div class="flex items-start gap-5" [class.divide-x]="monthCount() > 1">
+        <div
+          class="flex min-w-max items-start"
+          [class]="
+            monthCount() > 1
+              ? 'divide-x divide-[var(--av-divider)]'
+              : ''
+          "
+        >
           @for (month of months(); track month.date.getTime()) {
-            <div role="grid" [attr.aria-label]="month.label" class="flex-1" [class]="animate">
+            <div
+              role="grid"
+              [attr.aria-label]="month.label"
+              class="flex-1"
+              [class]="[animate, monthCount() > 1 ? 'px-3 first:pl-0 last:pr-0' : ''].join(' ')"
+            >
               @if (monthCount() > 1) {
-                <div class="mb-1 text-center text-[0.8rem] font-semibold text-[var(--av-fg)]">
+                <div class="mb-2 text-center text-[0.8rem] font-semibold text-[var(--av-fg)]">
                   {{ month.label }}
                 </div>
               }
 
-              <div role="row" class="grid" [style.grid-template-columns]="'repeat(' + gridColumns() + ', minmax(0, 1fr))'">
+              <div role="row" class="grid" [style.grid-template-columns]="gridTemplate()">
                 @if (showWeekNumbers()) {
                   <div
                     role="columnheader"
-                    class="grid place-items-center pb-1 text-[0.68rem] font-semibold uppercase tracking-wider text-[var(--av-fg-subtle)]"
+                    class="grid place-items-center pb-2 text-[0.68rem] font-semibold uppercase tracking-wider text-[var(--av-fg-subtle)]"
                     aria-label="Week"
                   >
                     Wk
@@ -79,7 +91,7 @@
                 @for (header of weekdayHeaders(); track header.long) {
                   <div
                     role="columnheader"
-                    class="grid place-items-center pb-1 text-[0.68rem] font-semibold uppercase tracking-wider"
+                    class="grid place-items-center pb-2 text-[0.68rem] font-semibold uppercase tracking-wider"
                     [class]="header.weekend ? 'text-[var(--av-fg-subtle)]' : 'text-[var(--av-fg-muted)]'"
                     [attr.aria-label]="header.long"
                   >
@@ -89,7 +101,7 @@
               </div>
 
               @for (week of month.weeks; track week.days[0].time) {
-                <div role="row" class="grid" [style.grid-template-columns]="'repeat(' + gridColumns() + ', minmax(0, 1fr))'">
+                <div role="row" class="grid" [style.grid-template-columns]="gridTemplate()">
                   @if (showWeekNumbers()) {
                     <div class="grid place-items-center text-[0.7rem] tabular-nums text-[var(--av-fg-subtle)]">
                       {{ week.weekNumber }}
@@ -174,7 +186,7 @@
 
   <!-- Footer ------------------------------------------------------- -->
   @if (showFooter()) {
-    <div class="mt-2 flex items-center justify-between gap-2 border-t border-[var(--av-divider)] pt-2">
+    <div class="mt-3 flex items-center justify-between gap-2 border-t border-[var(--av-divider)] pt-3">
       <button
         type="button"
         class="av-cell av-focus-ring px-2.5 py-1.5 text-[0.8rem] font-semibold text-[var(--av-accent)] hover:bg-[var(--av-accent-soft)] disabled:pointer-events-none disabled:text-[var(--av-disabled-fg)]"

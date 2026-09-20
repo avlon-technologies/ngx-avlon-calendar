@@ -1,5 +1,5 @@
 import { ApplicationConfig, provideBrowserGlobalErrorListeners, provideZonelessChangeDetection } from '@angular/core';
-import { provideAvlonCalendar } from 'ngx-avlon-calendar';
+import { provideAvlonCalendar } from '@avlon/ngx-avlon-calendar';
 
 export const appConfig: ApplicationConfig = {
   providers: [

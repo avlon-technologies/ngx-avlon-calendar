@@ -6,7 +6,7 @@ import {
   maskSpecFor,
   parseDate,
   type AvValueMode,
-} from 'ngx-avlon-calendar';
+} from '@avlon/ngx-avlon-calendar';
 
 /**
  * Masking, parsing and the value shape handed to the form.

@@ -7,7 +7,7 @@ import {
   Validators,
   type FormGroup,
 } from '@angular/forms';
-import { AvDatePicker, addDays, avDateRange, today } from 'ngx-avlon-calendar';
+import { AvDatePicker, addDays, avDateRange, today } from '@avlon/ngx-avlon-calendar';
 
 /**
  * The three ways a date picker gets used in a real application, side by side:

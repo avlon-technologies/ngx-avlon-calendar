@@ -1,7 +1,8 @@
 import { ComponentFixture, TestBed } from '@angular/core/testing';
 import { provideZonelessChangeDetection } from '@angular/core';
 import { beforeEach, describe, expect, it } from 'vitest';
-import { provideAvlonCalendar } from 'ngx-avlon-calendar';
+import { provideAvlonCalendar } from '@avlon/ngx-avlon-calendar';
+import { deepQuery, deepQueryAll } from '../../../ngx-avlon-calendar/src/lib/testing/deep-query';
 import { App } from './app';
 
 /**
@@ -36,8 +37,14 @@ async function settle(): Promise<void> {
   fixture.detectChanges();
 }
 
+// Both library components render into a shadow root, so the demo's assertions
+// have to cross that boundary the same way a person looking at the page does.
 function all(selector: string): HTMLElement[] {
-  return Array.from(root.querySelectorAll(selector));
+  return deepQueryAll(root, selector);
+}
+
+function one(selector: string): HTMLElement | null {
+  return deepQuery(root, selector);
 }
 
 function pickers(): HTMLElement[] {
@@ -57,7 +64,7 @@ function typeInto(el: HTMLInputElement, text: string): void {
 describe('the demo page', () => {
   it('renders every section', () => {
     for (const id of ['playground', 'themes', 'forms', 'masking', 'calendar']) {
-      expect(root.querySelector(`#${id}`), `expected a #${id} section`).toBeTruthy();
+      expect(one(`#${id}`), `expected a #${id} section`).toBeTruthy();
     }
   });
 
@@ -109,14 +116,15 @@ describe('theming section', () => {
 
   it('shares one selected date across the theme cards', async () => {
     const cards = all('#themes av-calendar');
-    const firstDay = cards[0]!.querySelector<HTMLButtonElement>(
+    const firstDay = deepQuery<HTMLButtonElement>(
+      cards[0]!,
       '[role="gridcell"] button:not([disabled])',
     );
     firstDay!.click();
     await settle();
 
     const selectedPerCard = all('#themes av-calendar').map(
-      (c) => c.querySelectorAll('[role="gridcell"][aria-selected="true"]').length,
+      (c) => deepQueryAll(c, '[role="gridcell"][aria-selected="true"]').length,
     );
     expect(selectedPerCard.every((n) => n === 1)).toBe(true);
   });
@@ -141,7 +149,7 @@ describe('presentation playground', () => {
 
   it('starts on the default theme with the icon on the right', () => {
     expect(stagePicker().className).toContain('av-theme-default');
-    const field = stagePicker().querySelector('[cdkOverlayOrigin]')!;
+    const field = deepQuery(stagePicker(), '.av-field')!;
     expect(Array.from(field.children).map((c) => c.tagName.toLowerCase())).toEqual([
       'div',
       'button',
@@ -151,7 +159,7 @@ describe('presentation playground', () => {
   it('moves the icon to the left', async () => {
     optionButton('Left').click();
     await settle();
-    const field = stagePicker().querySelector('[cdkOverlayOrigin]')!;
+    const field = deepQuery(stagePicker(), '.av-field')!;
     expect(Array.from(field.children).map((c) => c.tagName.toLowerCase())).toEqual([
       'button',
       'div',
@@ -167,7 +175,7 @@ describe('presentation playground', () => {
   it('switches format, which changes the placeholder', async () => {
     optionButton('dd.MM.yyyy').click();
     await settle();
-    const input = stagePicker().querySelector('input') as HTMLInputElement;
+    const input = deepQuery<HTMLInputElement>(stagePicker(), 'input')!;
     input.dispatchEvent(new Event('focus'));
     await settle();
     expect(input.placeholder).toBe('dd.mm.yyyy');
@@ -185,7 +193,7 @@ describe('presentation playground', () => {
   it('keeps the generated markup in step with the options', async () => {
     optionButton('Large').click();
     await settle();
-    const markup = root.querySelector('#playground pre')!.textContent ?? '';
+    const markup = one('#playground pre')!.textContent ?? '';
     expect(markup).toContain('size="lg"');
     expect(markup).toContain('<av-date-picker');
   });
@@ -209,13 +217,13 @@ describe('forms section', () => {
   });
 
   it('starts with the submit button disabled because the form is empty', () => {
-    const submit = root.querySelector('#forms button[type="submit"]') as HTMLButtonElement;
+    const submit = one('#forms button[type="submit"]') as HTMLButtonElement;
     expect(submit.disabled).toBe(true);
     expect(submit.textContent?.trim()).toBe('Fix the form to continue');
   });
 
   it('reports the reactive form as invalid until it is filled', () => {
-    const status = root.querySelector('#forms pre')?.parentElement?.textContent ?? '';
+    const status = one('#forms pre')?.parentElement?.textContent ?? '';
     expect(status).toContain('INVALID');
   });
 
@@ -228,7 +236,7 @@ describe('forms section', () => {
     typeInto(pickerInput(0), `${mm}${dd}${next.getFullYear()}`);
     await settle();
 
-    const json = root.querySelector('#forms pre')?.textContent ?? '';
+    const json = one('#forms pre')?.textContent ?? '';
     expect(json).toContain(`${next.getFullYear()}-${mm}-${dd}`);
   });
 
@@ -274,16 +282,14 @@ describe('masking section', () => {
   });
 
   it('shows which sample strings the parser accepts', () => {
-    const text = root.querySelector('#masking')?.textContent ?? '';
+    const text = one('#masking')?.textContent ?? '';
     expect(text).toContain('12/31/2026');
     expect(text).toContain('no such day');
     expect(text).toContain('does not match the format');
   });
 
   it('masks the standalone directive input', async () => {
-    const input = root.querySelector('#masking input[inputmode="numeric"]:not([id])') as
-      | HTMLInputElement
-      | null;
+    const input = one('#masking input[inputmode="numeric"]:not([id])') as HTMLInputElement | null;
     const target = input ?? (all('#masking input').at(-1) as HTMLInputElement);
     typeInto(target, '31122026');
     await settle();
@@ -299,7 +305,7 @@ describe('masking section', () => {
     typeInto(modeInput, '09202026');
     await settle();
 
-    const readout = root.querySelector('#masking .bg-slate-900')?.textContent ?? '';
+    const readout = one('#masking .bg-slate-900')?.textContent ?? '';
     expect(readout).toContain('2026-09-20');
     expect(readout).toContain('string');
   });
@@ -312,30 +318,37 @@ describe('calendar section', () => {
 
   it('shows week numbers on the inline calendar', () => {
     const first = all('#calendar av-calendar')[0]!;
-    expect(first.querySelector('[aria-label="Week"]')).toBeTruthy();
+    expect(deepQuery(first, '[aria-label="Week"]')).toBeTruthy();
   });
 
   it('strikes out unavailable days', () => {
     const availability = all('#calendar av-calendar')[1]!;
-    const disabled = availability.querySelectorAll('button[disabled]');
-    expect(disabled.length).toBeGreaterThan(0);
+    expect(deepQueryAll(availability, 'button[disabled]').length).toBeGreaterThan(0);
   });
 
   it('prints a rate inside every day cell of the custom calendar', () => {
     const custom = all('#calendar av-calendar').find((c) =>
-      c.textContent?.includes('$'),
+      (deepQuery(c, '[role="grid"]')?.textContent ?? '').includes('$'),
     );
     expect(custom, 'expected a calendar rendering prices').toBeTruthy();
-    expect(custom!.textContent).toMatch(/\$\d+/);
+    expect(deepQuery(custom!, '[role="grid"]')!.textContent).toMatch(/\$\d+/);
   });
 
   it('changes the first day of week from the buttons', async () => {
-    const monday = all('#calendar button').find((b) => b.textContent?.trim() === 'Monday');
+    // Find the example by its heading rather than by position, so reordering
+    // the section cannot quietly make this assert against a different calendar.
+    const example = all('demo-example').find((e) =>
+      e.querySelector('h3')?.textContent?.includes('Week start'),
+    );
+    expect(example, 'expected a week-start example').toBeTruthy();
+
+    const monday = Array.from(example!.querySelectorAll('button')).find(
+      (b) => b.textContent?.trim() === 'Monday',
+    );
     monday!.click();
     await settle();
 
-    const localeCalendar = all('#calendar av-calendar').at(-1)!;
-    const firstHeader = localeCalendar.querySelector('[role="columnheader"]');
+    const firstHeader = deepQuery(example!, '[role="columnheader"]');
     expect(firstHeader?.getAttribute('aria-label')).toBe('Monday');
   });
 });

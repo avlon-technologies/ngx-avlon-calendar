@@ -8,7 +8,7 @@
     "noPropertyAccessFromIndexSignature": true,
     "noImplicitReturns": true,
     "paths": {
-      "ngx-avlon-calendar": ["./dist/ngx-avlon-calendar"]
+      "@avlon/ngx-avlon-calendar": ["./dist/ngx-avlon-calendar"]
     },
     "noFallthroughCasesInSwitch": true,
     "skipLibCheck": true,

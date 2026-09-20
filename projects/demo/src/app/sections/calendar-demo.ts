@@ -1,49 +1,54 @@
 import { ChangeDetectionStrategy, Component, computed, signal } from '@angular/core';
-import { AvCalendar, AvDatePicker, addDays, isSameDay, today } from 'ngx-avlon-calendar';
+import { AvCalendar, AvDatePicker, addDays, isSameDay, today } from '@avlon/ngx-avlon-calendar';
+import { DemoExample } from './example';
 
 /**
  * What the calendar surface can be asked to do beyond "pick a day":
  * availability rules, custom cell content, multiple months, and the standalone
  * inline calendar with no text field attached.
+ *
+ * Each example carries the markup that produced it under its source tab.
  */
 @Component({
   selector: 'demo-calendar',
   changeDetection: ChangeDetectionStrategy.OnPush,
-  imports: [AvCalendar, AvDatePicker],
+  imports: [AvCalendar, AvDatePicker, DemoExample],
   template: `
-    <div class="grid gap-6 lg:grid-cols-2 xl:grid-cols-3">
+    <div class="grid items-start gap-6 lg:grid-cols-2 xl:grid-cols-3">
       <!-- Inline -------------------------------------------------- -->
-      <article class="rounded-2xl border border-slate-200 p-5 dark:border-slate-800">
-        <h3 class="text-sm font-semibold text-slate-900 dark:text-slate-50">Inline calendar</h3>
-        <p class="mt-0.5 mb-4 text-[0.75rem] text-slate-500">
-          <code class="font-mono">av-calendar</code> on its own. No input, no popover.
-        </p>
-        <div class="av-panel av-theme av-theme-default inline-block border border-[var(--av-border)]">
+      <demo-example heading="Inline calendar" [code]="source.inline">
+        <span blurb>
+          <code class="font-mono">av-calendar</code> on its own. No input, no popover, and no
+          stylesheet to import.
+        </span>
+
+        <div class="overflow-x-auto">
           <av-calendar [(value)]="inlineDate" [showWeekNumbers]="true" />
         </div>
-        <p class="mt-3 font-mono text-[0.72rem] text-slate-500">
+
+        <p footer class="font-mono text-[0.72rem] text-slate-500 dark:text-slate-400">
           {{ inlineDate() ? inlineDate()!.toDateString() : 'nothing selected' }}
         </p>
-      </article>
+      </demo-example>
 
       <!-- Availability -------------------------------------------- -->
-      <article class="rounded-2xl border border-slate-200 p-5 dark:border-slate-800">
-        <h3 class="text-sm font-semibold text-slate-900 dark:text-slate-50">Availability rules</h3>
-        <p class="mt-0.5 mb-4 text-[0.75rem] text-slate-500">
+      <demo-example heading="Availability rules" [code]="source.availability">
+        <span blurb>
           Weekends and three booked days are struck through and unselectable, in the grid and in the
           validator.
-        </p>
-        <div class="av-panel av-theme av-theme-forest inline-block border border-[var(--av-border)]">
-          <av-calendar
-            [(value)]="bookingDate"
-            theme="av-theme-forest"
-            [min]="todayDate"
-            [max]="maxBooking"
-            [dateFilter]="isBookable"
-            [showFooter]="false"
-          />
-        </div>
-        <div class="mt-4">
+        </span>
+
+        <div class="space-y-5">
+          <div class="overflow-x-auto">
+            <av-calendar
+              [(value)]="bookingDate"
+              theme="av-theme-forest"
+              [min]="todayDate"
+              [max]="maxBooking"
+              [dateFilter]="isBookable"
+              [showFooter]="false"
+            />
+          </div>
           <av-date-picker
             [(value)]="bookingDate"
             theme="av-theme-forest"
@@ -55,16 +60,20 @@ import { AvCalendar, AvDatePicker, addDays, isSameDay, today } from 'ngx-avlon-c
             hint="Weekdays within the next 90 days."
           />
         </div>
-      </article>
+      </demo-example>
 
       <!-- Two months ---------------------------------------------- -->
-      <article class="rounded-2xl border border-slate-200 p-5 dark:border-slate-800 xl:col-span-1 lg:col-span-2">
-        <h3 class="text-sm font-semibold text-slate-900 dark:text-slate-50">Two months at once</h3>
-        <p class="mt-0.5 mb-4 text-[0.75rem] text-slate-500">
+      <demo-example
+        heading="Two months at once"
+        [code]="source.twoMonths"
+        class="lg:col-span-2 xl:col-span-2"
+      >
+        <span blurb>
           <code class="font-mono">[numberOfMonths]="2"</code>. Paging and keyboard navigation cover
           both.
-        </p>
-        <div class="av-panel av-theme av-theme-midnight inline-block border border-[var(--av-border)]">
+        </span>
+
+        <div class="overflow-x-auto">
           <av-calendar
             [(value)]="rangeDate"
             theme="av-theme-midnight"
@@ -73,18 +82,58 @@ import { AvCalendar, AvDatePicker, addDays, isSameDay, today } from 'ngx-avlon-c
             [showFooter]="false"
           />
         </div>
-      </article>
+      </demo-example>
+
+      <!-- Locale --------------------------------------------------- -->
+      <demo-example heading="Week start and locale" [code]="source.locale">
+        <span blurb>
+          Month and weekday names come from the date adapter, which reads the application locale by
+          default.
+        </span>
+
+        <div class="space-y-4">
+          <div class="flex flex-wrap gap-2">
+            @for (option of weekStarts; track option.value) {
+              <button
+                type="button"
+                class="rounded-lg border px-2.5 py-1 text-[0.75rem] font-medium transition-colors"
+                [class]="
+                  weekStart() === option.value
+                    ? 'border-indigo-500 bg-indigo-500 text-white'
+                    : 'border-slate-300 bg-white text-slate-600 hover:border-slate-400 dark:border-slate-700 dark:bg-slate-800 dark:text-slate-300'
+                "
+                (click)="weekStart.set(option.value)"
+              >
+                {{ option.label }}
+              </button>
+            }
+          </div>
+
+          <div class="overflow-x-auto">
+            <av-calendar
+              theme="av-theme-mono"
+              [firstDayOfWeek]="weekStart()"
+              [(value)]="localeDate"
+              [showFooter]="false"
+              size="sm"
+            />
+          </div>
+        </div>
+      </demo-example>
 
       <!-- Custom cells -------------------------------------------- -->
-      <article class="rounded-2xl border border-slate-200 p-5 dark:border-slate-800 lg:col-span-2">
-        <h3 class="text-sm font-semibold text-slate-900 dark:text-slate-50">Custom day cells</h3>
-        <p class="mt-0.5 mb-4 text-[0.75rem] text-slate-500">
+      <demo-example
+        heading="Custom day cells"
+        [code]="source.customCells"
+        class="lg:col-span-2 xl:col-span-3"
+      >
+        <span blurb>
           A <code class="font-mono">dayTemplate</code> replaces the contents of every cell. Here it
           prints a nightly rate and marks the cheapest days.
-        </p>
+        </span>
 
-        <div class="flex flex-wrap items-start gap-6">
-          <div class="av-panel av-theme av-theme-rose inline-block border border-[var(--av-border)]">
+        <div class="flex flex-wrap items-start gap-8">
+          <div class="overflow-x-auto">
             <av-calendar
               [(value)]="stayDate"
               theme="av-theme-rose"
@@ -95,12 +144,14 @@ import { AvCalendar, AvDatePicker, addDays, isSameDay, today } from 'ngx-avlon-c
           </div>
 
           <ng-template #priceCell let-date let-day="day" let-outside="outside" let-selected="selected">
-            <span class="flex flex-col items-center leading-none">
+            <span class="flex flex-col items-center pb-1 leading-none">
               <span class="text-[0.85rem] font-medium">{{ day }}</span>
               @if (!outside) {
                 <span
                   class="mt-0.5 text-[0.55rem] font-semibold tabular-nums"
-                  [class]="selected ? 'opacity-90' : isCheap(date) ? 'text-emerald-600' : 'opacity-55'"
+                  [class]="
+                    selected ? 'opacity-90' : isCheap(date) ? 'text-emerald-600' : 'opacity-55'
+                  "
                 >
                   {{ rateFor(date) }}
                 </span>
@@ -108,53 +159,22 @@ import { AvCalendar, AvDatePicker, addDays, isSameDay, today } from 'ngx-avlon-c
             </span>
           </ng-template>
 
-          <div class="min-w-48 flex-1">
-            <div class="rounded-lg bg-slate-900 p-3 font-mono text-[0.7rem] leading-relaxed text-slate-300">
+          <div class="min-w-56 flex-1">
+            <div
+              class="rounded-lg bg-slate-900 p-4 font-mono text-[0.72rem] leading-relaxed text-slate-300"
+            >
               <div class="text-slate-500">selected</div>
               <div>{{ stayDate() ? stayDate()!.toDateString() : 'null' }}</div>
-              <div class="mt-2 text-slate-500">rate</div>
+              <div class="mt-3 text-slate-500">rate</div>
               <div>{{ stayDate() ? rateFor(stayDate()!) : '-' }}</div>
             </div>
-            <p class="mt-3 text-[0.75rem] leading-relaxed text-slate-500">
+            <p class="mt-4 text-[0.8rem] leading-relaxed text-slate-600 dark:text-slate-400">
               The template receives the date plus the cell's state, so badges, dots, prices and
               availability chips all stay in the consumer's hands.
             </p>
           </div>
         </div>
-      </article>
-
-      <!-- Locale --------------------------------------------------- -->
-      <article class="rounded-2xl border border-slate-200 p-5 dark:border-slate-800">
-        <h3 class="text-sm font-semibold text-slate-900 dark:text-slate-50">Week start and locale</h3>
-        <p class="mt-0.5 mb-4 text-[0.75rem] text-slate-500">
-          Month and weekday names come from the date adapter, which reads the app locale by default.
-        </p>
-        <div class="flex flex-wrap gap-2">
-          @for (option of weekStarts; track option.value) {
-            <button
-              type="button"
-              class="rounded-lg border px-2.5 py-1 text-[0.75rem] font-medium transition-colors"
-              [class]="
-                weekStart() === option.value
-                  ? 'border-indigo-500 bg-indigo-500 text-white'
-                  : 'border-slate-300 text-slate-600 hover:border-slate-400 dark:border-slate-700 dark:text-slate-300'
-              "
-              (click)="weekStart.set(option.value)"
-            >
-              {{ option.label }}
-            </button>
-          }
-        </div>
-        <div class="av-panel av-theme av-theme-mono mt-4 inline-block border border-[var(--av-border)]">
-          <av-calendar
-            theme="av-theme-mono"
-            [firstDayOfWeek]="weekStart()"
-            [(value)]="localeDate"
-            [showFooter]="false"
-            size="sm"
-          />
-        </div>
-      </article>
+      </demo-example>
     </div>
   `,
 })
@@ -175,7 +195,7 @@ export class CalendarDemo {
     { label: 'Saturday', value: 6 },
   ];
 
-  /** Three arbitrary days taken out, to stand in for a real booking feed. */
+  /** Three arbitrary days taken out, standing in for a real booking feed. */
   private readonly booked = computed(() => [
     addDays(this.todayDate, 3),
     addDays(this.todayDate, 4),
@@ -200,4 +220,74 @@ export class CalendarDemo {
     const weekend = date.getDay() === 0 || date.getDay() === 6;
     return !weekend && seed % 9 <= 2;
   }
+
+  /** The markup behind each example, shown under its source tab. */
+  readonly source = {
+    inline: `<av-calendar [(value)]="picked" [showWeekNumbers]="true" />`,
+
+    availability: `<av-calendar
+  [(value)]="appointment"
+  theme="av-theme-forest"
+  [min]="today"
+  [max]="ninetyDaysOut"
+  [dateFilter]="isBookable"
+  [showFooter]="false"
+/>
+
+<av-date-picker
+  [(value)]="appointment"
+  theme="av-theme-forest"
+  label="Appointment"
+  [min]="today"
+  [max]="ninetyDaysOut"
+  [dateFilter]="isBookable"
+  [errorMessages]="{ avDateDisabled: 'We are fully booked that day.' }"
+  hint="Weekdays within the next 90 days."
+/>
+
+// The same predicate greys out the grid and fails the control.
+isBookable = (date: Date) => {
+  const day = date.getDay();
+  if (day === 0 || day === 6) return false;
+  return !this.booked().some((b) => isSameDay(b, date));
+};`,
+
+    twoMonths: `<av-calendar
+  [(value)]="picked"
+  theme="av-theme-midnight"
+  [numberOfMonths]="2"
+  size="sm"
+  [showFooter]="false"
+/>`,
+
+    locale: `<av-calendar
+  theme="av-theme-mono"
+  [firstDayOfWeek]="weekStart()"
+  [(value)]="picked"
+  [showFooter]="false"
+  size="sm"
+/>
+
+// Or set it once for the whole application, alongside the locale:
+provideAvlonCalendar({ locale: 'en-GB', firstDayOfWeek: 1 })`,
+
+    customCells: `<av-calendar
+  [(value)]="stay"
+  theme="av-theme-rose"
+  size="lg"
+  [showFooter]="false"
+  [dayTemplate]="priceCell"
+/>
+
+<ng-template #priceCell let-date let-day="day" let-outside="outside" let-selected="selected">
+  <span class="flex flex-col items-center pb-1 leading-none">
+    <span class="text-[0.85rem] font-medium">{{ day }}</span>
+    @if (!outside) {
+      <span class="mt-0.5 text-[0.55rem] font-semibold tabular-nums">
+        {{ rateFor(date) }}
+      </span>
+    }
+  </span>
+</ng-template>`,
+  };
 }

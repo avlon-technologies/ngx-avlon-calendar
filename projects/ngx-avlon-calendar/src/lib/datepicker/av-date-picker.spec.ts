@@ -4,6 +4,7 @@ import { FormControl, FormsModule, ReactiveFormsModule, Validators } from '@angu
 import { beforeEach, describe, expect, it } from 'vitest';
 import { AvDatePicker } from './av-date-picker';
 import { makeDate } from '../core/date-utils';
+import { deepQuery, deepQueryAll } from '../testing/deep-query';
 
 /** Types text into an input one character at a time, as a browser would. */
 function typeInto(el: HTMLInputElement, text: string): void {
@@ -24,13 +25,13 @@ function clear(el: HTMLInputElement): void {
 }
 
 function inputOf(fixture: ComponentFixture<unknown>): HTMLInputElement {
-  const el = fixture.nativeElement.querySelector('input');
+  const el = deepQuery<HTMLInputElement>(fixture.nativeElement, 'input');
   expect(el, 'expected the picker to render an input').toBeTruthy();
-  return el as HTMLInputElement;
+  return el!;
 }
 
 function errorTextOf(fixture: ComponentFixture<unknown>): string | null {
-  const el = fixture.nativeElement.querySelector('[role="alert"]');
+  const el = deepQuery(fixture.nativeElement, '[role="alert"]');
   return el ? (el.textContent ?? '').trim() : null;
 }
 
@@ -371,16 +372,16 @@ describe('AvDatePicker without a form', () => {
   });
 
   it('offers a clear button only once there is something to clear', async () => {
-    expect(fixture.nativeElement.querySelector('[aria-label="Clear date"]')).toBeNull();
+    expect(deepQuery(fixture.nativeElement, '[aria-label="Clear date"]')).toBeNull();
 
     typeInto(inputOf(fixture), '09202026');
     fixture.detectChanges();
     await fixture.whenStable();
 
-    const clearButton = fixture.nativeElement.querySelector('[aria-label="Clear date"]');
+    const clearButton = deepQuery<HTMLButtonElement>(fixture.nativeElement, '[aria-label="Clear date"]');
     expect(clearButton).toBeTruthy();
 
-    clearButton.click();
+    clearButton!.click();
     fixture.detectChanges();
     await fixture.whenStable();
     expect(host.picked()).toBeNull();
@@ -417,8 +418,9 @@ describe('AvDatePicker presentation', () => {
   });
 
   function fieldChildren(): string[] {
-    const field = fixture.nativeElement.querySelector('[cdkOverlayOrigin]');
-    return Array.from(field.children).map((c) => (c as Element).tagName.toLowerCase());
+    const field = deepQuery(fixture.nativeElement, '.av-field');
+    expect(field, 'expected the picker to render a field').toBeTruthy();
+    return Array.from(field!.children).map((c) => (c as Element).tagName.toLowerCase());
   }
 
   it('puts the toggle after the input by default', () => {
@@ -440,31 +442,31 @@ describe('AvDatePicker presentation', () => {
   });
 
   it('applies the default theme class', () => {
-    expect(fixture.nativeElement.querySelector('av-date-picker').className).toContain(
-      'av-theme-default',
-    );
+    expect(
+      (fixture.nativeElement.querySelector('av-date-picker') as HTMLElement).className,
+    ).toContain('av-theme-default');
   });
 
   it('applies a chosen theme class', async () => {
     host.theme.set('av-theme-midnight');
     fixture.detectChanges();
     await fixture.whenStable();
-    expect(fixture.nativeElement.querySelector('av-date-picker').className).toContain(
-      'av-theme-midnight',
-    );
+    expect(
+      (fixture.nativeElement.querySelector('av-date-picker') as HTMLElement).className,
+    ).toContain('av-theme-midnight');
   });
 
   it('renders the calendar in the layout when inline', async () => {
-    expect(fixture.nativeElement.querySelector('av-calendar')).toBeNull();
+    expect(deepQuery(fixture.nativeElement, 'av-calendar')).toBeNull();
     host.inline.set(true);
     fixture.detectChanges();
     await fixture.whenStable();
-    expect(fixture.nativeElement.querySelector('av-calendar')).toBeTruthy();
+    expect(deepQuery(fixture.nativeElement, 'av-calendar')).toBeTruthy();
   });
 
   it('links the input to its label and describes its state', () => {
     const input = inputOf(fixture);
-    const label = fixture.nativeElement.querySelector('label');
+    const label = deepQuery(fixture.nativeElement, 'label')!;
     expect(label.getAttribute('for')).toBe(input.id);
     expect(input.getAttribute('aria-haspopup')).toBe('dialog');
     expect(input.getAttribute('aria-expanded')).toBe('false');

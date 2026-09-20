@@ -12,7 +12,7 @@ import {
   type AvIconPosition,
   type AvOpenTrigger,
   type AvSize,
-} from 'ngx-avlon-calendar';
+} from '@avlon/ngx-avlon-calendar';
 
 type Token = string | number;
 

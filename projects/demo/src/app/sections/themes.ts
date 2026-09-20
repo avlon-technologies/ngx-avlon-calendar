@@ -1,5 +1,5 @@
 import { ChangeDetectionStrategy, Component, signal } from '@angular/core';
-import { AvCalendar, AvDatePicker } from 'ngx-avlon-calendar';
+import { AvCalendar, AvDatePicker } from '@avlon/ngx-avlon-calendar';
 
 interface ThemeCard {
   readonly name: string;
@@ -55,7 +55,7 @@ interface ThemeCard {
 
           <div class="space-y-5 p-5">
             <av-calendar
-              class="av-panel block"
+              class="block w-full"
               [theme]="card.className"
               [value]="selected()"
               (valueChange)="selected.set($event)"
@@ -91,7 +91,7 @@ interface ThemeCard {
         </header>
         <div class="space-y-5 p-5">
           <av-calendar
-            class="av-panel block"
+            class="block w-full"
             theme="demo-theme-citrus"
             [value]="selected()"
             (valueChange)="selected.set($event)"

@@ -1,22 +1,28 @@
 /**
- * ngx-avlon-calendar - theme tokens and the handful of rules that utilities
- * cannot express.
+ * ngx-avlon-calendar - token contract and structural rules.
  *
- * Everything visual routes through custom properties. A theme is a class that
- * redefines those properties; nothing else in the library hard-codes a colour,
- * a radius, or a duration. That is the whole theming contract, and it means a
- * consumer can restyle the picker completely without overriding a single
- * selector.
+ * This file is authored for a **shadow root**. Both components render with
+ * `ViewEncapsulation.ShadowDom`, so these rules are scoped to the component and
+ * cannot reach the host page, and the host page's stylesheets cannot reach in.
  *
- * Scope: apply a theme class to the picker, to a container, or to :root.
- * Themes nest, so a single field can opt out of the page theme.
+ * ### How theming still works across that boundary
+ *
+ * Custom properties inherit through a shadow boundary even though rules do not.
+ * That gives three ways to theme, in increasing order of locality:
+ *
+ * 1. Set tokens on any ancestor in your own CSS. They inherit in.
+ * 2. Put a shipped theme class on the component: `theme="av-theme-rose"`. The
+ *    component copies it onto its host element, where `:host(...)` matches.
+ * 3. Set tokens inline on the element itself.
+ *
+ * Nothing else in the library hard-codes a colour, a radius, or a duration.
  */
 
 /* ------------------------------------------------------------------ *
- * Token contract
+ * Token contract - the default theme
  * ------------------------------------------------------------------ */
 
-.av-theme {
+:host {
   /* Typography */
   --av-font: inherit;
   --av-font-numeric: inherit;
@@ -25,8 +31,8 @@
   --av-radius-field: 0.625rem;
   --av-radius-panel: 1rem;
   --av-radius-cell: 0.5rem;
-  --av-cell-size: 2.25rem;
-  --av-panel-padding: 0.875rem;
+  --av-cell-size: 2.375rem;
+  --av-panel-padding: 1rem;
 
   /* Surfaces */
   --av-surface: #ffffff;
@@ -71,20 +77,63 @@
   --av-duration-panel: 180ms;
   --av-ease: cubic-bezier(0.2, 0, 0.13, 1);
 
+  display: block;
   font-family: var(--av-font);
+  color: var(--av-fg);
+
+  /* The host page's line-height and box-sizing stop at this boundary, so the
+     component states its own rather than inheriting something unpredictable. */
+  line-height: 1.5;
+  text-align: start;
 }
 
-/* ------------------------------------------------------------------ *
- * Themes
- * ------------------------------------------------------------------ */
-
-/* Default: cool neutrals with an indigo accent. */
-.av-theme-default {
-  /* Inherits every token from .av-theme unchanged. */
+:host,
+:host *,
+:host *::before,
+:host *::after {
+  box-sizing: border-box;
 }
 
-.av-theme-default:where(.av-dark, .dark *, .av-dark *),
-:where(.dark) .av-theme-default {
+/* A standalone calendar paints its own surface, so dropping one into a page
+   needs no wrapper. The host element itself stays in the light DOM, so a
+   consumer can still give it a border or a shadow from their own stylesheet. */
+:host(.av-calendar) {
+  background: var(--av-panel-surface);
+  border-radius: var(--av-radius-panel);
+}
+
+/* The default theme follows the page into dark mode. `:host-context` is not
+   available in every engine, so the media query is the load-bearing rule and
+   the class selector is the enhancement. */
+@media (prefers-color-scheme: dark) {
+  :host(:not(.av-theme-light)) {
+    --av-surface: #10151f;
+    --av-surface-sunken: #171d2a;
+    --av-surface-hover: #1c2433;
+    --av-panel-surface: #131924;
+    --av-border: #2a3344;
+    --av-border-hover: #3b4658;
+    --av-divider: #212938;
+    --av-fg: #e8ecf4;
+    --av-fg-muted: #8f9cb3;
+    --av-fg-subtle: #5b6779;
+    --av-fg-placeholder: #5b6779;
+    --av-accent: #7c7bff;
+    --av-accent-hover: #918fff;
+    --av-accent-fg: #0b0f17;
+    --av-accent-soft: #1e2140;
+    --av-danger: #f87171;
+    --av-danger-soft: #2a1618;
+    --av-danger-border: #5c2b2b;
+    --av-disabled-fg: #3f4959;
+    --av-shadow-panel:
+      0 1px 2px rgb(0 0 0 / 0.5),
+      0 16px 40px -12px rgb(0 0 0 / 0.7);
+  }
+}
+
+:host(.av-dark),
+:host-context(.dark):host(:not(.av-theme-light)) {
   --av-surface: #10151f;
   --av-surface-sunken: #171d2a;
   --av-surface-hover: #1c2433;
@@ -109,8 +158,12 @@
     0 16px 40px -12px rgb(0 0 0 / 0.7);
 }
 
-/* Midnight: a dark-first theme that stays dark in a light page. */
-.av-theme-midnight {
+/* ------------------------------------------------------------------ *
+ * Shipped themes
+ * ------------------------------------------------------------------ */
+
+/* Midnight: dark whatever the page does. */
+:host(.av-theme-midnight) {
   --av-radius-field: 0.5rem;
   --av-radius-panel: 0.875rem;
   --av-radius-cell: 0.4rem;
@@ -132,14 +185,14 @@
   --av-danger: #fb7185;
   --av-danger-soft: #2a1320;
   --av-danger-border: #55223a;
-  --av-disabled-fg: #38436199;
+  --av-disabled-fg: #384361;
   --av-shadow-panel:
     0 0 0 1px rgb(56 189 248 / 0.08),
     0 20px 50px -18px rgb(0 0 0 / 0.85);
 }
 
-/* Rose: warm paper, generous curvature, editorial. */
-.av-theme-rose {
+/* Rose: warm paper, round cells, editorial. */
+:host(.av-theme-rose) {
   --av-radius-field: 0.875rem;
   --av-radius-panel: 1.25rem;
   --av-radius-cell: 999px;
@@ -167,8 +220,8 @@
     0 16px 40px -12px rgb(160 60 70 / 0.22);
 }
 
-/* Forest: muted greens, low chroma, calm. */
-.av-theme-forest {
+/* Forest: low chroma greens, tight radii. */
+:host(.av-theme-forest) {
   --av-radius-field: 0.5rem;
   --av-radius-panel: 0.75rem;
   --av-radius-cell: 0.375rem;
@@ -196,12 +249,11 @@
     0 14px 36px -12px rgb(20 60 35 / 0.24);
 }
 
-/* Mono: no chroma, hard corners, hairline rules. */
-.av-theme-mono {
+/* Mono: no chroma, hard corners, no motion. */
+:host(.av-theme-mono) {
   --av-radius-field: 0.125rem;
   --av-radius-panel: 0.25rem;
   --av-radius-cell: 0.125rem;
-  --av-cell-size: 2.25rem;
   --av-surface: #ffffff;
   --av-surface-sunken: #f5f5f5;
   --av-surface-hover: #ededed;
@@ -228,8 +280,8 @@
   --av-duration-panel: 90ms;
 }
 
-/* Glass: translucent panel over whatever sits behind it. */
-.av-theme-glass {
+/* Glass: translucent, blurred, sits over imagery. */
+:host(.av-theme-glass) {
   --av-radius-field: 0.75rem;
   --av-radius-panel: 1.25rem;
   --av-radius-cell: 0.5rem;
@@ -254,8 +306,8 @@
     0 20px 50px -16px rgb(15 23 42 / 0.35);
 }
 
-.av-theme-glass .av-panel,
-.av-theme-glass .av-field {
+:host(.av-theme-glass) .av-panel,
+:host(.av-theme-glass) .av-field {
   backdrop-filter: blur(16px) saturate(1.6);
   -webkit-backdrop-filter: blur(16px) saturate(1.6);
 }
@@ -274,14 +326,8 @@
     background-color var(--av-duration) var(--av-ease);
 }
 
-/* Variant modifiers live here so they win over the base radius regardless of
-   how the consumer orders their stylesheets. */
 .av-field.av-field-flat {
   border-radius: 0;
-}
-
-.av-field.av-field-pill {
-  border-radius: 999px;
 }
 
 .av-field-input {
@@ -308,6 +354,21 @@
   font-family: var(--av-font);
 }
 
+/* The popover lives in the top layer, so no ancestor overflow can clip it. */
+.av-popover {
+  position: fixed;
+  margin: 0;
+  padding: 0;
+  border: 0;
+  background: transparent;
+  overflow: visible;
+  inset: auto;
+}
+
+.av-popover::backdrop {
+  background: transparent;
+}
+
 .av-cell {
   border-radius: var(--av-radius-cell);
   transition:
@@ -320,12 +381,13 @@
   transform: scale(0.94);
 }
 
-/* A ring rather than a fill, so "today" stays readable when also selected. */
+/* A rule under the number rather than a fill, so "today" stays readable when
+   it is also selected, and stays clear of custom cell content. */
 .av-cell-today::after {
   content: '';
   position: absolute;
   inset-inline: 38%;
-  bottom: 0.28rem;
+  bottom: 0.15rem;
   height: 2px;
   border-radius: 2px;
   background: currentColor;
@@ -341,14 +403,14 @@
 }
 
 /* ------------------------------------------------------------------ *
- * Panel motion
+ * Motion
  * ------------------------------------------------------------------ */
 
 .av-panel-enter {
   animation: av-panel-in var(--av-duration-panel) var(--av-ease) both;
 }
 
-.av-panel-enter[data-placement^='top'] {
+.av-panel-enter[data-placement='top'] {
   animation-name: av-panel-in-up;
 }
 
@@ -374,7 +436,6 @@
   }
 }
 
-/* The grid slides in the direction the user paged. */
 .av-page-next {
   animation: av-slide-from-right var(--av-duration-panel) var(--av-ease) both;
 }
@@ -420,4 +481,20 @@
   .av-cell:active:not(:disabled) {
     transform: none;
   }
+}
+
+/* ------------------------------------------------------------------ *
+ * Screen-reader-only text
+ * ------------------------------------------------------------------ */
+
+.sr-only {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  padding: 0;
+  margin: -1px;
+  overflow: hidden;
+  clip: rect(0, 0, 0, 0);
+  white-space: nowrap;
+  border-width: 0;
 }

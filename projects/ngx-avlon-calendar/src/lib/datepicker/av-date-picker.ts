@@ -1,15 +1,9 @@
-import { A11yModule } from '@angular/cdk/a11y';
-import {
-  CdkConnectedOverlay,
-  CdkOverlayOrigin,
-  Overlay,
-  type ConnectedPosition,
-} from '@angular/cdk/overlay';
 import {
   ChangeDetectionStrategy,
   Component,
   DoCheck,
   ElementRef,
+  OnDestroy,
   computed,
   effect,
   forwardRef,
@@ -20,6 +14,7 @@ import {
   signal,
   untracked,
   viewChild,
+  ViewEncapsulation,
   type TemplateRef,
 } from '@angular/core';
 import {
@@ -36,6 +31,14 @@ import { AvDateAdapter } from '../core/date-adapter';
 import { AV_CALENDAR_DEFAULTS, mergeConfig } from '../core/defaults';
 import { maskSpecFor } from '../core/date-format';
 import { AvMaskController } from '../core/mask-controller';
+import {
+  deepActiveElement,
+  isOutside,
+  positionPanel,
+  supportsPopover,
+  trapTab,
+  type AvPlacement,
+} from '../core/popover';
 import { compareDays, isSameDay, isValidDate, startOfDay } from '../core/date-utils';
 import { decodeValue, encodeValue, sameEncodedValue } from '../core/value-codec';
 import type {
@@ -52,13 +55,6 @@ import type {
 } from '../core/types';
 
 let uniqueId = 0;
-
-const PANEL_POSITIONS: ConnectedPosition[] = [
-  { originX: 'start', originY: 'bottom', overlayX: 'start', overlayY: 'top', offsetY: 6 },
-  { originX: 'start', originY: 'top', overlayX: 'start', overlayY: 'bottom', offsetY: -6 },
-  { originX: 'end', originY: 'bottom', overlayX: 'end', overlayY: 'top', offsetY: 6 },
-  { originX: 'end', originY: 'top', overlayX: 'end', overlayY: 'bottom', offsetY: -6 },
-];
 
 /**
  * A date field: masked text input, validation, and a calendar popover.
@@ -77,7 +73,9 @@ const PANEL_POSITIONS: ConnectedPosition[] = [
   selector: 'av-date-picker',
   templateUrl: './av-date-picker.html',
   changeDetection: ChangeDetectionStrategy.OnPush,
-  imports: [AvCalendar, CdkConnectedOverlay, CdkOverlayOrigin, A11yModule, NgTemplateOutlet],
+  imports: [AvCalendar, NgTemplateOutlet],
+  encapsulation: ViewEncapsulation.ShadowDom,
+  styleUrl: '../styles/av-styles.css',
   providers: [
     // Both hooks are registered as forward references to this component and
     // neither injects `NgControl`. Asking for `NgControl` here would be
@@ -92,12 +90,14 @@ const PANEL_POSITIONS: ConnectedPosition[] = [
     '[attr.data-disabled]': 'isDisabled() || null',
   },
 })
-export class AvDatePicker implements ControlValueAccessor, Validator, DoCheck {
+export class AvDatePicker implements ControlValueAccessor, Validator, DoCheck, OnDestroy {
   private readonly defaults = inject(AV_CALENDAR_DEFAULTS);
   private readonly adapter = inject(AvDateAdapter);
-  private readonly overlay = inject(Overlay);
+  private readonly host = inject<ElementRef<HTMLElement>>(ElementRef);
 
   private readonly inputRef = viewChild<ElementRef<HTMLInputElement>>('field');
+  private readonly fieldRef = viewChild<ElementRef<HTMLElement>>('fieldBox');
+  private readonly panelRef = viewChild<ElementRef<HTMLElement>>('panel');
   private readonly calendarRef = viewChild(AvCalendar);
 
   private readonly uid = `av-dp-${++uniqueId}`;
@@ -169,6 +169,9 @@ export class AvDatePicker implements ControlValueAccessor, Validator, DoCheck {
   /** Extra classes for the popover panel. */
   readonly panelClass = input<string>('');
 
+  /** Which edge of the field the panel lines up with. */
+  readonly panelAlign = input<'start' | 'end'>('start');
+
   /** Extra classes for the `input` element. */
   readonly inputClass = input<string>('');
 
@@ -226,8 +229,12 @@ export class AvDatePicker implements ControlValueAccessor, Validator, DoCheck {
   protected readonly controlErrors = signal<ValidationErrors | null>(null);
   protected readonly controlShowsErrors = signal(false);
 
-  protected readonly positions = PANEL_POSITIONS;
-  protected readonly scrollStrategy = this.overlay.scrollStrategies.reposition();
+  /** Where the panel ended up, so the enter animation can slide the right way. */
+  protected readonly placement = signal<AvPlacement>('bottom');
+  protected readonly panelStyle = signal<Record<string, string>>({});
+
+  /** Teardown for the listeners that only run while the panel is open. */
+  private releasePanel: (() => void) | null = null;
 
   /** True while the user is editing the text, so value writes leave it alone. */
   private typing = false;
@@ -427,7 +434,7 @@ export class AvDatePicker implements ControlValueAccessor, Validator, DoCheck {
   });
 
   protected readonly panelClasses = computed(() =>
-    ['av-panel av-panel-enter av-theme', this.theme() ?? '', this.panelClass()]
+    ['av-panel av-popover av-panel-enter overflow-auto', this.panelClass()]
       .filter(Boolean)
       .join(' '),
   );
@@ -576,6 +583,11 @@ export class AvDatePicker implements ControlValueAccessor, Validator, DoCheck {
     }
 
     return null;
+  }
+
+  ngOnDestroy(): void {
+    this.releasePanel?.();
+    this.releasePanel = null;
   }
 
   ngDoCheck(): void {
@@ -729,13 +741,26 @@ export class AvDatePicker implements ControlValueAccessor, Validator, DoCheck {
     if (this.open() || this.isDisabled() || this.readonly() || this.inline()) return;
     this.open.set(true);
     this.opened.emit();
+
+    // The panel only exists once the template has rendered it.
+    queueMicrotask(() => this.showPanel());
   }
 
   /** Closes the popover and returns focus to the input. */
   close(options: { restoreFocus?: boolean } = {}): void {
     if (!this.open()) return;
+
+    this.releasePanel?.();
+    this.releasePanel = null;
+
+    const panel = this.panelRef()?.nativeElement;
+    if (panel && supportsPopover(panel) && panel.matches(':popover-open')) {
+      panel.hidePopover();
+    }
+
     this.open.set(false);
     this.closed.emit();
+
     if (options.restoreFocus !== false) {
       this.inputRef()?.nativeElement.focus({ preventScroll: true });
     }
@@ -746,15 +771,92 @@ export class AvDatePicker implements ControlValueAccessor, Validator, DoCheck {
     else this.openPanel();
   }
 
-  protected onPanelAttached(): void {
+  /**
+   * Promotes the panel to the top layer, places it, and starts the listeners
+   * that keep it placed and dismissable.
+   */
+  private showPanel(): void {
+    const panel = this.panelRef()?.nativeElement;
+    if (!panel) return;
+
+    // jsdom and older engines have no popover API. The panel still renders and
+    // works; it is simply positioned in flow rather than in the top layer.
+    if (supportsPopover(panel) && !panel.matches(':popover-open')) {
+      panel.showPopover();
+    }
+
+    this.reposition();
     queueMicrotask(() => this.calendarRef()?.focus());
+
+    const onDocumentPointer = (event: Event) => {
+      if (isOutside(event, [this.host.nativeElement, panel])) {
+        this.markTouched();
+        this.close({ restoreFocus: false });
+      }
+    };
+    const onViewportChange = () => this.reposition();
+
+    document.addEventListener('pointerdown', onDocumentPointer, true);
+    window.addEventListener('resize', onViewportChange);
+    // Capture, so scrolling in any ancestor keeps the panel attached.
+    window.addEventListener('scroll', onViewportChange, true);
+
+    this.releasePanel = () => {
+      document.removeEventListener('pointerdown', onDocumentPointer, true);
+      window.removeEventListener('resize', onViewportChange);
+      window.removeEventListener('scroll', onViewportChange, true);
+    };
   }
 
-  protected onOutsideClick(event: MouseEvent): void {
-    const host = this.inputRef()?.nativeElement.closest('.av-date-picker');
-    if (host?.contains(event.target as Node)) return;
-    this.markTouched();
-    this.close({ restoreFocus: false });
+  /** Measures the field and the panel and pins the panel to the viewport. */
+  private reposition(): void {
+    const field = this.fieldRef()?.nativeElement;
+    const panel = this.panelRef()?.nativeElement;
+    if (!field || !panel) return;
+
+    const anchor = field.getBoundingClientRect();
+    const box = panel.getBoundingClientRect();
+
+    const placed = positionPanel(
+      anchor,
+      { width: box.width || 300, height: box.height || 340 },
+      { width: window.innerWidth, height: window.innerHeight },
+      { alignEnd: this.panelAlign() === 'end' },
+    );
+
+    this.placement.set(placed.placement);
+    this.panelStyle.set({
+      top: `${Math.round(placed.top)}px`,
+      left: `${Math.round(placed.left)}px`,
+      'max-height': `${Math.round(placed.maxHeight)}px`,
+    });
+  }
+
+  protected onPanelKeydown(event: KeyboardEvent): void {
+    const panel = this.panelRef()?.nativeElement;
+    if (!panel) return;
+
+    if (event.key === 'Escape') {
+      event.preventDefault();
+      event.stopPropagation();
+      this.close();
+      return;
+    }
+
+    trapTab(panel, event);
+  }
+
+  /** Closes when focus leaves the component entirely, such as on a Tab out. */
+  protected onPanelFocusOut(): void {
+    if (!this.open()) return;
+    queueMicrotask(() => {
+      const active = deepActiveElement();
+      const panel = this.panelRef()?.nativeElement;
+      const inside =
+        (panel && active && panel.contains(active)) ||
+        (active && this.host.nativeElement.contains(active));
+      if (!inside) this.close({ restoreFocus: false });
+    });
   }
 
   protected onDateSelected(date: Date): void {

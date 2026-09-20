@@ -34,11 +34,7 @@
   }
 
   <!-- Field -------------------------------------------------------- -->
-  <div
-    cdkOverlayOrigin
-    #origin="cdkOverlayOrigin"
-    [class]="fieldClasses()"
-  >
+  <div #fieldBox [class]="fieldClasses()">
     @if (iconPosition() === 'left') {
       <ng-container [ngTemplateOutlet]="toggle" />
     }
@@ -123,32 +119,27 @@
   <div class="av-panel mt-2 inline-block border border-[var(--av-border)]">
     <ng-container [ngTemplateOutlet]="calendar" />
   </div>
-} @else {
-  <ng-template
-    cdkConnectedOverlay
-    [cdkConnectedOverlayOrigin]="origin"
-    [cdkConnectedOverlayOpen]="open()"
-    [cdkConnectedOverlayPositions]="positions"
-    [cdkConnectedOverlayScrollStrategy]="scrollStrategy"
-    [cdkConnectedOverlayFlexibleDimensions]="false"
-    [cdkConnectedOverlayPush]="true"
-    (attach)="onPanelAttached()"
-    (overlayOutsideClick)="onOutsideClick($event)"
-    (detach)="close({ restoreFocus: false })"
+} @else if (open()) {
+  <!--
+    A native popover, so the panel sits in the browser's top layer and no
+    ancestor's overflow can clip it, while still living inside this component's
+    shadow root where its styles reach it and the page's cannot.
+  -->
+  <div
+    #panel
+    popover="manual"
+    role="dialog"
+    aria-modal="false"
+    [id]="panelId()"
+    [attr.aria-label]="(label() ?? 'Date') + ' calendar'"
+    [attr.data-placement]="placement()"
+    [class]="panelClasses()"
+    [style]="panelStyle()"
+    (keydown)="onPanelKeydown($event)"
+    (focusout)="onPanelFocusOut()"
   >
-    <div
-      cdkTrapFocus
-      [cdkTrapFocusAutoCapture]="false"
-      role="dialog"
-      aria-modal="false"
-      [id]="panelId()"
-      [attr.aria-label]="(label() ?? 'Date') + ' calendar'"
-      [class]="panelClasses()"
-      (keydown.escape)="close()"
-    >
-      <ng-container [ngTemplateOutlet]="calendar" />
-    </div>
-  </ng-template>
+    <ng-container [ngTemplateOutlet]="calendar" />
+  </div>
 }
 
 <ng-template #calendar>
