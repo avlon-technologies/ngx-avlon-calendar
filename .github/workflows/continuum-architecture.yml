@@ -41,12 +41,12 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - name: Check out this repository
-        uses: actions/checkout@v4
+        uses: actions/checkout@v7
         with:
           fetch-depth: 0 # the PR base is needed for the delta
 
       - name: Check out the Continuum toolchain
-        uses: actions/checkout@v4
+        uses: actions/checkout@v7
         with:
           repository: ${{ env.CONTINUUM_REPO }}
           ref: ${{ env.CONTINUUM_REF }}
