@@ -128,7 +128,7 @@ jobs:
 
       - name: Post the architectural delta
         if: github.event_name == 'pull_request' && steps.delta.outputs.summary != ''
-        uses: actions/github-script@v7
+        uses: actions/github-script@v9
         with:
           script: |
             const body = [
