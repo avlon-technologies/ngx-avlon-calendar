@@ -1,0 +1,14 @@
+{
+  "continuum-toolchain": "1",
+  "source": "linked",
+  "path": "C:/projects/avlon/continuum",
+  "commit": "24bc783a6ab1eff8c87f4b2b8ebc57fba4149e04",
+  "dirty": true,
+  "version": "2.0.0-alpha.3",
+  "installed": {
+    "hooks": true,
+    "skills": true,
+    "mcp": true,
+    "ci": true
+  }
+}

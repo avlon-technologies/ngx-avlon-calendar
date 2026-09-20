@@ -1,0 +1,176 @@
+@let sizes = sizeClasses();
+@let floating = floatingLabel();
+
+<!-- Toggle button, shared by the left and right icon positions ------- -->
+<ng-template #toggle>
+  <button
+    type="button"
+    class="av-cell av-focus-ring grid shrink-0 place-items-center text-[var(--av-fg-muted)] transition-colors hover:text-[var(--av-accent)] disabled:pointer-events-none disabled:text-[var(--av-disabled-fg)]"
+    [class]="sizes.toggle"
+    [disabled]="isDisabled() || readonly()"
+    [attr.aria-label]="(label() ?? 'Date') + ': open calendar'"
+    [attr.aria-expanded]="open()"
+    [attr.aria-controls]="open() ? panelId() : null"
+    tabindex="-1"
+    (click)="onToggleClick($event)"
+  >
+    <svg viewBox="0 0 20 20" [class]="sizes.icon" fill="none" stroke="currentColor" stroke-width="1.6" aria-hidden="true">
+      <rect x="2.75" y="4.25" width="14.5" height="13" rx="2.5" />
+      <path d="M2.75 8.25h14.5M6.75 2.75v3M13.25 2.75v3" stroke-linecap="round" />
+      <circle cx="10" cy="12.5" r="1.15" fill="currentColor" stroke="none" />
+    </svg>
+  </button>
+</ng-template>
+
+<div class="av-field-shell">
+  <!-- Static label ------------------------------------------------- -->
+  @if (label() && !floating) {
+    <label [for]="fieldId()" class="mb-1.5 block text-[0.8rem] font-medium text-[var(--av-fg-muted)]">
+      {{ label() }}
+      @if (required()) {
+        <span class="text-[var(--av-danger)]" aria-hidden="true">*</span>
+      }
+    </label>
+  }
+
+  <!-- Field -------------------------------------------------------- -->
+  <div
+    cdkOverlayOrigin
+    #origin="cdkOverlayOrigin"
+    [class]="fieldClasses()"
+  >
+    @if (iconPosition() === 'left') {
+      <ng-container [ngTemplateOutlet]="toggle" />
+    }
+
+    <div class="relative h-full min-w-0 flex-1">
+      @if (floating) {
+        <label
+          [for]="fieldId()"
+          class="pointer-events-none absolute left-0 right-0 origin-left truncate transition-all duration-[var(--av-duration)] ease-[var(--av-ease)]"
+          [class]="labelClasses()"
+        >
+          {{ label() }}
+          @if (required()) {
+            <span class="text-[var(--av-danger)]" aria-hidden="true">*</span>
+          }
+        </label>
+      }
+
+      <input
+        #field
+        type="text"
+        inputmode="numeric"
+        autocomplete="off"
+        spellcheck="false"
+        [class]="inputClasses()"
+        [id]="fieldId()"
+        [attr.name]="name()"
+        [attr.placeholder]="floating && !labelFloats() ? null : resolvedPlaceholder()"
+        [disabled]="isDisabled()"
+        [readOnly]="readonly()"
+        [attr.required]="required() ? '' : null"
+        [attr.aria-invalid]="invalid()"
+        [attr.aria-describedby]="describedBy()"
+        [attr.aria-haspopup]="inline() ? null : 'dialog'"
+        [attr.aria-expanded]="inline() ? null : open()"
+        (input)="onInput($event)"
+        (keydown)="onKeydown($event)"
+        (focus)="onFocus()"
+        (blur)="onBlur()"
+        (click)="onInputClick()"
+      />
+    </div>
+
+    @if (clearable() && hasValue() && !isDisabled() && !readonly()) {
+      <button
+        type="button"
+        class="av-cell av-focus-ring grid h-6 w-6 shrink-0 place-items-center text-[var(--av-fg-subtle)] hover:bg-[var(--av-surface-hover)] hover:text-[var(--av-fg)]"
+        aria-label="Clear date"
+        tabindex="-1"
+        (click)="clear($event)"
+      >
+        <svg viewBox="0 0 20 20" class="h-3.5 w-3.5" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true">
+          <path d="m6 6 8 8M14 6l-8 8" stroke-linecap="round" />
+        </svg>
+      </button>
+    }
+
+    @if (iconPosition() === 'right') {
+      <ng-container [ngTemplateOutlet]="toggle" />
+    }
+  </div>
+
+  <!-- Hint and errors ---------------------------------------------- -->
+  @if (errorText()) {
+    <p [id]="errorId()" role="alert" class="mt-1.5 flex items-start gap-1 text-[0.76rem] font-medium text-[var(--av-danger)]">
+      <svg viewBox="0 0 20 20" class="mt-px h-3.5 w-3.5 shrink-0" fill="currentColor" aria-hidden="true">
+        <path
+          fill-rule="evenodd"
+          d="M10 2a8 8 0 1 0 0 16 8 8 0 0 0 0-16Zm.75 4.25a.75.75 0 0 0-1.5 0v4.5a.75.75 0 0 0 1.5 0v-4.5ZM10 13a.9.9 0 1 0 0 1.8.9.9 0 0 0 0-1.8Z"
+          clip-rule="evenodd"
+        />
+      </svg>
+      <span>{{ errorText() }}</span>
+    </p>
+  } @else if (hint()) {
+    <p [id]="hintId()" class="mt-1.5 text-[0.76rem] text-[var(--av-fg-muted)]">{{ hint() }}</p>
+  }
+</div>
+
+<!-- Calendar ------------------------------------------------------- -->
+@if (inline()) {
+  <div class="av-panel mt-2 inline-block border border-[var(--av-border)]">
+    <ng-container [ngTemplateOutlet]="calendar" />
+  </div>
+} @else {
+  <ng-template
+    cdkConnectedOverlay
+    [cdkConnectedOverlayOrigin]="origin"
+    [cdkConnectedOverlayOpen]="open()"
+    [cdkConnectedOverlayPositions]="positions"
+    [cdkConnectedOverlayScrollStrategy]="scrollStrategy"
+    [cdkConnectedOverlayFlexibleDimensions]="false"
+    [cdkConnectedOverlayPush]="true"
+    (attach)="onPanelAttached()"
+    (overlayOutsideClick)="onOutsideClick($event)"
+    (detach)="close({ restoreFocus: false })"
+  >
+    <div
+      cdkTrapFocus
+      [cdkTrapFocusAutoCapture]="false"
+      role="dialog"
+      aria-modal="false"
+      [id]="panelId()"
+      [attr.aria-label]="(label() ?? 'Date') + ' calendar'"
+      [class]="panelClasses()"
+      (keydown.escape)="close()"
+    >
+      <ng-container [ngTemplateOutlet]="calendar" />
+    </div>
+  </ng-template>
+}
+
+<ng-template #calendar>
+  <av-calendar
+    [value]="value()"
+    [min]="min()"
+    [max]="max()"
+    [dateFilter]="dateFilter()"
+    [firstDayOfWeek]="firstDayOfWeek()"
+    [numberOfMonths]="numberOfMonths()"
+    [showWeekNumbers]="showWeekNumbers()"
+    [showFooter]="showFooter()"
+    [showOutsideDays]="showOutsideDays()"
+    [startView]="startView()"
+    [size]="size()"
+    [theme]="theme()"
+    [disabled]="isDisabled() || readonly()"
+    [todayLabel]="todayLabel()"
+    [clearLabel]="clearLabel()"
+    [dayTemplate]="dayTemplate()"
+    (dateSelected)="onDateSelected($event)"
+    (cleared)="onCalendarCleared()"
+    (closeRequested)="close()"
+  />
+</ng-template>

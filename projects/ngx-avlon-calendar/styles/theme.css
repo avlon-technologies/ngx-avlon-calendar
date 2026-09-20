@@ -1,0 +1,423 @@
+/**
+ * ngx-avlon-calendar - theme tokens and the handful of rules that utilities
+ * cannot express.
+ *
+ * Everything visual routes through custom properties. A theme is a class that
+ * redefines those properties; nothing else in the library hard-codes a colour,
+ * a radius, or a duration. That is the whole theming contract, and it means a
+ * consumer can restyle the picker completely without overriding a single
+ * selector.
+ *
+ * Scope: apply a theme class to the picker, to a container, or to :root.
+ * Themes nest, so a single field can opt out of the page theme.
+ */
+
+/* ------------------------------------------------------------------ *
+ * Token contract
+ * ------------------------------------------------------------------ */
+
+.av-theme {
+  /* Typography */
+  --av-font: inherit;
+  --av-font-numeric: inherit;
+
+  /* Geometry */
+  --av-radius-field: 0.625rem;
+  --av-radius-panel: 1rem;
+  --av-radius-cell: 0.5rem;
+  --av-cell-size: 2.25rem;
+  --av-panel-padding: 0.875rem;
+
+  /* Surfaces */
+  --av-surface: #ffffff;
+  --av-surface-sunken: #f1f5f9;
+  --av-surface-hover: #f1f5f9;
+  --av-panel-surface: #ffffff;
+
+  /* Lines */
+  --av-border: #d7dce5;
+  --av-border-hover: #b6bfcd;
+  --av-divider: #eaeef4;
+
+  /* Text */
+  --av-fg: #0f172a;
+  --av-fg-muted: #64748b;
+  --av-fg-subtle: #a3adbd;
+  --av-fg-placeholder: #9aa5b5;
+
+  /* Accent */
+  --av-accent: #4f46e5;
+  --av-accent-hover: #4338ca;
+  --av-accent-fg: #ffffff;
+  --av-accent-soft: #eef2ff;
+  --av-accent-ring: color-mix(in oklab, var(--av-accent) 35%, transparent);
+
+  /* State */
+  --av-danger: #dc2626;
+  --av-danger-soft: #fef2f2;
+  --av-danger-border: #f2b8b8;
+  --av-today: var(--av-accent);
+  --av-disabled-fg: #c3cad6;
+
+  /* Depth */
+  --av-shadow-field: 0 1px 2px 0 rgb(15 23 42 / 0.04);
+  --av-shadow-panel:
+    0 1px 2px rgb(15 23 42 / 0.06),
+    0 12px 32px -8px rgb(15 23 42 / 0.16),
+    0 2px 8px -4px rgb(15 23 42 / 0.08);
+
+  /* Motion */
+  --av-duration: 150ms;
+  --av-duration-panel: 180ms;
+  --av-ease: cubic-bezier(0.2, 0, 0.13, 1);
+
+  font-family: var(--av-font);
+}
+
+/* ------------------------------------------------------------------ *
+ * Themes
+ * ------------------------------------------------------------------ */
+
+/* Default: cool neutrals with an indigo accent. */
+.av-theme-default {
+  /* Inherits every token from .av-theme unchanged. */
+}
+
+.av-theme-default:where(.av-dark, .dark *, .av-dark *),
+:where(.dark) .av-theme-default {
+  --av-surface: #10151f;
+  --av-surface-sunken: #171d2a;
+  --av-surface-hover: #1c2433;
+  --av-panel-surface: #131924;
+  --av-border: #2a3344;
+  --av-border-hover: #3b4658;
+  --av-divider: #212938;
+  --av-fg: #e8ecf4;
+  --av-fg-muted: #8f9cb3;
+  --av-fg-subtle: #5b6779;
+  --av-fg-placeholder: #5b6779;
+  --av-accent: #7c7bff;
+  --av-accent-hover: #918fff;
+  --av-accent-fg: #0b0f17;
+  --av-accent-soft: #1e2140;
+  --av-danger: #f87171;
+  --av-danger-soft: #2a1618;
+  --av-danger-border: #5c2b2b;
+  --av-disabled-fg: #3f4959;
+  --av-shadow-panel:
+    0 1px 2px rgb(0 0 0 / 0.5),
+    0 16px 40px -12px rgb(0 0 0 / 0.7);
+}
+
+/* Midnight: a dark-first theme that stays dark in a light page. */
+.av-theme-midnight {
+  --av-radius-field: 0.5rem;
+  --av-radius-panel: 0.875rem;
+  --av-radius-cell: 0.4rem;
+  --av-surface: #0e1424;
+  --av-surface-sunken: #141c30;
+  --av-surface-hover: #1a2440;
+  --av-panel-surface: #0e1424;
+  --av-border: #23304f;
+  --av-border-hover: #35456d;
+  --av-divider: #1b2540;
+  --av-fg: #dce7ff;
+  --av-fg-muted: #7e8db3;
+  --av-fg-subtle: #4e5b7c;
+  --av-fg-placeholder: #4e5b7c;
+  --av-accent: #38bdf8;
+  --av-accent-hover: #5ccbfa;
+  --av-accent-fg: #06121f;
+  --av-accent-soft: #0f2c42;
+  --av-danger: #fb7185;
+  --av-danger-soft: #2a1320;
+  --av-danger-border: #55223a;
+  --av-disabled-fg: #38436199;
+  --av-shadow-panel:
+    0 0 0 1px rgb(56 189 248 / 0.08),
+    0 20px 50px -18px rgb(0 0 0 / 0.85);
+}
+
+/* Rose: warm paper, generous curvature, editorial. */
+.av-theme-rose {
+  --av-radius-field: 0.875rem;
+  --av-radius-panel: 1.25rem;
+  --av-radius-cell: 999px;
+  --av-surface: #fffbfa;
+  --av-surface-sunken: #fdf2f1;
+  --av-surface-hover: #fdeceb;
+  --av-panel-surface: #fffbfa;
+  --av-border: #f0dcd9;
+  --av-border-hover: #e3c0bb;
+  --av-divider: #f7e7e5;
+  --av-fg: #44201d;
+  --av-fg-muted: #9a6f6a;
+  --av-fg-subtle: #c9a9a4;
+  --av-fg-placeholder: #c9a9a4;
+  --av-accent: #e11d62;
+  --av-accent-hover: #c4154f;
+  --av-accent-fg: #ffffff;
+  --av-accent-soft: #fde7ef;
+  --av-danger: #b91c1c;
+  --av-danger-soft: #fef2f2;
+  --av-danger-border: #f0b9b9;
+  --av-disabled-fg: #ddc4c0;
+  --av-shadow-panel:
+    0 1px 2px rgb(120 40 40 / 0.05),
+    0 16px 40px -12px rgb(160 60 70 / 0.22);
+}
+
+/* Forest: muted greens, low chroma, calm. */
+.av-theme-forest {
+  --av-radius-field: 0.5rem;
+  --av-radius-panel: 0.75rem;
+  --av-radius-cell: 0.375rem;
+  --av-surface: #fbfdfb;
+  --av-surface-sunken: #eef5ef;
+  --av-surface-hover: #e6f0e8;
+  --av-panel-surface: #fbfdfb;
+  --av-border: #cfdfd3;
+  --av-border-hover: #a9c4b0;
+  --av-divider: #e3ede5;
+  --av-fg: #13271a;
+  --av-fg-muted: #5c7364;
+  --av-fg-subtle: #9bb0a2;
+  --av-fg-placeholder: #9bb0a2;
+  --av-accent: #15803d;
+  --av-accent-hover: #126b33;
+  --av-accent-fg: #ffffff;
+  --av-accent-soft: #dcf0e2;
+  --av-danger: #b45309;
+  --av-danger-soft: #fef6ec;
+  --av-danger-border: #e9c99e;
+  --av-disabled-fg: #bdcfc3;
+  --av-shadow-panel:
+    0 1px 2px rgb(20 50 30 / 0.06),
+    0 14px 36px -12px rgb(20 60 35 / 0.24);
+}
+
+/* Mono: no chroma, hard corners, hairline rules. */
+.av-theme-mono {
+  --av-radius-field: 0.125rem;
+  --av-radius-panel: 0.25rem;
+  --av-radius-cell: 0.125rem;
+  --av-cell-size: 2.25rem;
+  --av-surface: #ffffff;
+  --av-surface-sunken: #f5f5f5;
+  --av-surface-hover: #ededed;
+  --av-panel-surface: #ffffff;
+  --av-border: #111111;
+  --av-border-hover: #111111;
+  --av-divider: #dcdcdc;
+  --av-fg: #111111;
+  --av-fg-muted: #666666;
+  --av-fg-subtle: #a8a8a8;
+  --av-fg-placeholder: #a8a8a8;
+  --av-accent: #111111;
+  --av-accent-hover: #000000;
+  --av-accent-fg: #ffffff;
+  --av-accent-soft: #ebebeb;
+  --av-accent-ring: rgb(17 17 17 / 0.25);
+  --av-danger: #a10000;
+  --av-danger-soft: #fdf0f0;
+  --av-danger-border: #a10000;
+  --av-disabled-fg: #c8c8c8;
+  --av-shadow-field: none;
+  --av-shadow-panel: 0 0 0 1px #111111;
+  --av-duration: 0ms;
+  --av-duration-panel: 90ms;
+}
+
+/* Glass: translucent panel over whatever sits behind it. */
+.av-theme-glass {
+  --av-radius-field: 0.75rem;
+  --av-radius-panel: 1.25rem;
+  --av-radius-cell: 0.5rem;
+  --av-surface: rgb(255 255 255 / 0.62);
+  --av-surface-sunken: rgb(255 255 255 / 0.4);
+  --av-surface-hover: rgb(255 255 255 / 0.75);
+  --av-panel-surface: rgb(255 255 255 / 0.68);
+  --av-border: rgb(255 255 255 / 0.65);
+  --av-border-hover: rgb(255 255 255 / 0.9);
+  --av-divider: rgb(15 23 42 / 0.08);
+  --av-fg: #0b1220;
+  --av-fg-muted: #4a5568;
+  --av-fg-subtle: #7c8698;
+  --av-fg-placeholder: #7c8698;
+  --av-accent: #0ea5e9;
+  --av-accent-hover: #0284c7;
+  --av-accent-fg: #ffffff;
+  --av-accent-soft: rgb(14 165 233 / 0.16);
+  --av-disabled-fg: rgb(11 18 32 / 0.25);
+  --av-shadow-panel:
+    inset 0 1px 0 rgb(255 255 255 / 0.6),
+    0 20px 50px -16px rgb(15 23 42 / 0.35);
+}
+
+.av-theme-glass .av-panel,
+.av-theme-glass .av-field {
+  backdrop-filter: blur(16px) saturate(1.6);
+  -webkit-backdrop-filter: blur(16px) saturate(1.6);
+}
+
+/* ------------------------------------------------------------------ *
+ * Structural rules
+ * ------------------------------------------------------------------ */
+
+.av-field {
+  background: var(--av-surface);
+  border-radius: var(--av-radius-field);
+  box-shadow: var(--av-shadow-field);
+  transition:
+    border-color var(--av-duration) var(--av-ease),
+    box-shadow var(--av-duration) var(--av-ease),
+    background-color var(--av-duration) var(--av-ease);
+}
+
+/* Variant modifiers live here so they win over the base radius regardless of
+   how the consumer orders their stylesheets. */
+.av-field.av-field-flat {
+  border-radius: 0;
+}
+
+.av-field.av-field-pill {
+  border-radius: 999px;
+}
+
+.av-field-input {
+  font-family: var(--av-font-numeric);
+  font-variant-numeric: tabular-nums;
+  color: var(--av-fg);
+  caret-color: var(--av-accent);
+}
+
+.av-field-input::placeholder {
+  color: var(--av-fg-placeholder);
+}
+
+/* The native calendar affordance would compete with ours. */
+.av-field-input::-webkit-calendar-picker-indicator {
+  display: none;
+}
+
+.av-panel {
+  background: var(--av-panel-surface);
+  border-radius: var(--av-radius-panel);
+  box-shadow: var(--av-shadow-panel);
+  color: var(--av-fg);
+  font-family: var(--av-font);
+}
+
+.av-cell {
+  border-radius: var(--av-radius-cell);
+  transition:
+    background-color var(--av-duration) var(--av-ease),
+    color var(--av-duration) var(--av-ease),
+    transform var(--av-duration) var(--av-ease);
+}
+
+.av-cell:active:not(:disabled) {
+  transform: scale(0.94);
+}
+
+/* A ring rather than a fill, so "today" stays readable when also selected. */
+.av-cell-today::after {
+  content: '';
+  position: absolute;
+  inset-inline: 38%;
+  bottom: 0.28rem;
+  height: 2px;
+  border-radius: 2px;
+  background: currentColor;
+  opacity: 0.85;
+}
+
+.av-focus-ring:focus-visible {
+  outline: 2px solid transparent;
+  outline-offset: 2px;
+  box-shadow:
+    0 0 0 2px var(--av-panel-surface),
+    0 0 0 4px var(--av-accent-ring);
+}
+
+/* ------------------------------------------------------------------ *
+ * Panel motion
+ * ------------------------------------------------------------------ */
+
+.av-panel-enter {
+  animation: av-panel-in var(--av-duration-panel) var(--av-ease) both;
+}
+
+.av-panel-enter[data-placement^='top'] {
+  animation-name: av-panel-in-up;
+}
+
+@keyframes av-panel-in {
+  from {
+    opacity: 0;
+    transform: translateY(-0.375rem) scale(0.97);
+  }
+  to {
+    opacity: 1;
+    transform: none;
+  }
+}
+
+@keyframes av-panel-in-up {
+  from {
+    opacity: 0;
+    transform: translateY(0.375rem) scale(0.97);
+  }
+  to {
+    opacity: 1;
+    transform: none;
+  }
+}
+
+/* The grid slides in the direction the user paged. */
+.av-page-next {
+  animation: av-slide-from-right var(--av-duration-panel) var(--av-ease) both;
+}
+
+.av-page-prev {
+  animation: av-slide-from-left var(--av-duration-panel) var(--av-ease) both;
+}
+
+@keyframes av-slide-from-right {
+  from {
+    opacity: 0;
+    transform: translateX(0.75rem);
+  }
+  to {
+    opacity: 1;
+    transform: none;
+  }
+}
+
+@keyframes av-slide-from-left {
+  from {
+    opacity: 0;
+    transform: translateX(-0.75rem);
+  }
+  to {
+    opacity: 1;
+    transform: none;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .av-panel-enter,
+  .av-page-next,
+  .av-page-prev {
+    animation: none;
+  }
+
+  .av-cell,
+  .av-field {
+    transition: none;
+  }
+
+  .av-cell:active:not(:disabled) {
+    transform: none;
+  }
+}

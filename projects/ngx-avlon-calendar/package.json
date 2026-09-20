@@ -1,0 +1,39 @@
+{
+  "name": "ngx-avlon-calendar",
+  "version": "0.1.0",
+  "description": "An aesthetic, flexible Angular date picker: format-driven input masking, real validation, reactive and template-driven forms, and a fully themable calendar built with Tailwind CSS.",
+  "keywords": [
+    "angular",
+    "datepicker",
+    "date-picker",
+    "calendar",
+    "tailwind",
+    "tailwindcss",
+    "input-mask",
+    "date-mask",
+    "reactive-forms",
+    "a11y"
+  ],
+  "license": "MIT",
+  "sideEffects": false,
+  "peerDependencies": {
+    "@angular/cdk": "^22.0.0",
+    "@angular/common": "^22.1.0",
+    "@angular/core": "^22.1.0",
+    "@angular/forms": "^22.1.0"
+  },
+  "dependencies": {
+    "tslib": "^2.3.0"
+  },
+  "exports": {
+    "./styles/theme.css": {
+      "style": "./styles/theme.css",
+      "default": "./styles/theme.css"
+    },
+    "./styles/ngx-avlon-calendar.css": {
+      "style": "./styles/ngx-avlon-calendar.css",
+      "default": "./styles/ngx-avlon-calendar.css"
+    }
+  },
+  "author": "Avlon"
+}

@@ -1,0 +1,198 @@
+@let dir = pageDirection();
+@let animate = dir === 'prev' ? 'av-page-prev' : dir === 'next' ? 'av-page-next' : '';
+
+<div class="av-calendar-body select-none p-[var(--av-panel-padding)]">
+  <!-- Header ------------------------------------------------------- -->
+  @if (headerTemplate()) {
+    <ng-container [ngTemplateOutlet]="headerTemplate()!" />
+  } @else {
+    <div class="mb-2 flex items-center gap-1">
+      <button
+        type="button"
+        class="av-cell av-focus-ring grid h-8 w-8 shrink-0 place-items-center text-[var(--av-fg-muted)] hover:bg-[var(--av-surface-hover)] hover:text-[var(--av-fg)] disabled:pointer-events-none disabled:text-[var(--av-disabled-fg)]"
+        [disabled]="!canGoPrev()"
+        [attr.aria-label]="prevLabel()"
+        (click)="page(-1)"
+      >
+        <svg viewBox="0 0 20 20" class="h-4 w-4" fill="none" stroke="currentColor" stroke-width="1.8" aria-hidden="true">
+          <path d="M12.5 4.5 7 10l5.5 5.5" stroke-linecap="round" stroke-linejoin="round" />
+        </svg>
+      </button>
+
+      <button
+        type="button"
+        class="av-cell av-focus-ring flex h-8 flex-1 items-center justify-center gap-1 px-2 text-[0.9rem] font-semibold tracking-tight text-[var(--av-fg)] hover:bg-[var(--av-surface-hover)]"
+        [attr.aria-label]="'Change view, currently ' + headerLabel()"
+        (click)="cycleView()"
+      >
+        <span>{{ headerLabel() }}</span>
+        <svg
+          viewBox="0 0 20 20"
+          class="h-3.5 w-3.5 text-[var(--av-fg-subtle)] transition-transform duration-[var(--av-duration)]"
+          [class.rotate-180]="view() !== 'days'"
+          fill="none"
+          stroke="currentColor"
+          stroke-width="1.8"
+          aria-hidden="true"
+        >
+          <path d="m5.5 8 4.5 4.5L14.5 8" stroke-linecap="round" stroke-linejoin="round" />
+        </svg>
+      </button>
+
+      <button
+        type="button"
+        class="av-cell av-focus-ring grid h-8 w-8 shrink-0 place-items-center text-[var(--av-fg-muted)] hover:bg-[var(--av-surface-hover)] hover:text-[var(--av-fg)] disabled:pointer-events-none disabled:text-[var(--av-disabled-fg)]"
+        [disabled]="!canGoNext()"
+        [attr.aria-label]="nextLabel()"
+        (click)="page(1)"
+      >
+        <svg viewBox="0 0 20 20" class="h-4 w-4" fill="none" stroke="currentColor" stroke-width="1.8" aria-hidden="true">
+          <path d="M7.5 4.5 13 10l-5.5 5.5" stroke-linecap="round" stroke-linejoin="round" />
+        </svg>
+      </button>
+    </div>
+  }
+
+  <!-- Body --------------------------------------------------------- -->
+  <div #grid>
+    @switch (view()) {
+      @case ('days') {
+        <div class="flex items-start gap-5" [class.divide-x]="monthCount() > 1">
+          @for (month of months(); track month.date.getTime()) {
+            <div role="grid" [attr.aria-label]="month.label" class="flex-1" [class]="animate">
+              @if (monthCount() > 1) {
+                <div class="mb-1 text-center text-[0.8rem] font-semibold text-[var(--av-fg)]">
+                  {{ month.label }}
+                </div>
+              }
+
+              <div role="row" class="grid" [style.grid-template-columns]="'repeat(' + gridColumns() + ', minmax(0, 1fr))'">
+                @if (showWeekNumbers()) {
+                  <div
+                    role="columnheader"
+                    class="grid place-items-center pb-1 text-[0.68rem] font-semibold uppercase tracking-wider text-[var(--av-fg-subtle)]"
+                    aria-label="Week"
+                  >
+                    Wk
+                  </div>
+                }
+                @for (header of weekdayHeaders(); track header.long) {
+                  <div
+                    role="columnheader"
+                    class="grid place-items-center pb-1 text-[0.68rem] font-semibold uppercase tracking-wider"
+                    [class]="header.weekend ? 'text-[var(--av-fg-subtle)]' : 'text-[var(--av-fg-muted)]'"
+                    [attr.aria-label]="header.long"
+                  >
+                    <span aria-hidden="true">{{ header.narrow }}</span>
+                  </div>
+                }
+              </div>
+
+              @for (week of month.weeks; track week.days[0].time) {
+                <div role="row" class="grid" [style.grid-template-columns]="'repeat(' + gridColumns() + ', minmax(0, 1fr))'">
+                  @if (showWeekNumbers()) {
+                    <div class="grid place-items-center text-[0.7rem] tabular-nums text-[var(--av-fg-subtle)]">
+                      {{ week.weekNumber }}
+                    </div>
+                  }
+                  @for (cell of week.days; track cell.time) {
+                    <div role="gridcell" [attr.aria-selected]="cell.selected" class="grid place-items-center p-px">
+                      @if (cell.outside && !showOutsideDays()) {
+                        <span [class]="cellSize()" aria-hidden="true"></span>
+                      } @else {
+                        <button
+                          type="button"
+                          [class]="dayClasses(cell)"
+                          [disabled]="cell.disabled"
+                          [attr.tabindex]="cell.focused ? 0 : -1"
+                          [attr.data-av-active]="cell.focused"
+                          [attr.aria-label]="cell.label"
+                          [attr.aria-current]="cell.today ? 'date' : null"
+                          [attr.aria-disabled]="cell.disabled"
+                          (click)="selectDay(cell)"
+                        >
+                          @if (dayTemplate()) {
+                            <ng-container
+                              [ngTemplateOutlet]="dayTemplate()!"
+                              [ngTemplateOutletContext]="dayContext(cell)"
+                            />
+                          } @else {
+                            {{ cell.day }}
+                          }
+                        </button>
+                      }
+                    </div>
+                  }
+                </div>
+              }
+            </div>
+          }
+        </div>
+      }
+
+      @case ('months') {
+        <div class="grid grid-cols-3 gap-1.5 py-1" [class]="animate" role="grid" aria-label="Choose a month">
+          @for (choice of monthChoices(); track choice.value) {
+            <button
+              type="button"
+              role="gridcell"
+              class="text-[0.85rem]"
+              [class]="choiceClasses(choice, 'h-11')"
+              [disabled]="choice.disabled"
+              [attr.tabindex]="choice.focused ? 0 : -1"
+              [attr.data-av-active]="choice.focused"
+              [attr.aria-selected]="choice.selected"
+              (click)="selectMonth(choice)"
+            >
+              {{ choice.label }}
+            </button>
+          }
+        </div>
+      }
+
+      @case ('years') {
+        <div class="grid grid-cols-4 gap-1.5 py-1" [class]="animate" role="grid" aria-label="Choose a year">
+          @for (choice of yearChoices(); track choice.value) {
+            <button
+              type="button"
+              role="gridcell"
+              class="text-[0.82rem] tabular-nums"
+              [class]="choiceClasses(choice, 'h-10')"
+              [disabled]="choice.disabled"
+              [attr.tabindex]="choice.focused ? 0 : -1"
+              [attr.data-av-active]="choice.focused"
+              [attr.aria-selected]="choice.selected"
+              (click)="selectYear(choice)"
+            >
+              {{ choice.label }}
+            </button>
+          }
+        </div>
+      }
+    }
+  </div>
+
+  <!-- Footer ------------------------------------------------------- -->
+  @if (showFooter()) {
+    <div class="mt-2 flex items-center justify-between gap-2 border-t border-[var(--av-divider)] pt-2">
+      <button
+        type="button"
+        class="av-cell av-focus-ring px-2.5 py-1.5 text-[0.8rem] font-semibold text-[var(--av-accent)] hover:bg-[var(--av-accent-soft)] disabled:pointer-events-none disabled:text-[var(--av-disabled-fg)]"
+        [disabled]="disabled()"
+        (click)="goToToday()"
+      >
+        {{ todayLabel() }}
+      </button>
+      <button
+        type="button"
+        class="av-cell av-focus-ring px-2.5 py-1.5 text-[0.8rem] font-medium text-[var(--av-fg-muted)] hover:bg-[var(--av-surface-hover)] hover:text-[var(--av-fg)] disabled:pointer-events-none disabled:text-[var(--av-disabled-fg)]"
+        [disabled]="disabled() || !value()"
+        (click)="clear()"
+      >
+        {{ clearLabel() }}
+      </button>
+    </div>
+  }
+
+  <div class="sr-only" aria-live="polite" aria-atomic="true">{{ liveMessage() }}</div>
+</div>
