@@ -97,7 +97,7 @@ jobs:
           fi
 
       - name: Upload the tarball
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v7
         with:
           name: package
           path: dist/ngx-avlon-calendar
