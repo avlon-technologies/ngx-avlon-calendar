@@ -25,14 +25,14 @@ on:
 
 permissions:
   contents: read
-  pull-requests: write   # only needed for the delta comment
+  pull-requests: write # only needed for the delta comment
 
 env:
   # The Continuum toolchain checkout to pin. Replace with your fork or
   # a tag; pinning a ref (never a moving branch) is what keeps the gate
   # reproducible and stops a toolchain-era move from surprising you.
   CONTINUUM_REPO: avlon-technologies/continuum
-  CONTINUUM_REF: 24bc783a6ab1eff8c87f4b2b8ebc57fba4149e04   # pinned by continuum install — see continuum/toolchain.json
+  CONTINUUM_REF: 24bc783a6ab1eff8c87f4b2b8ebc57fba4149e04 # pinned by continuum install — see continuum/toolchain.json
   # The model this repository owns.
   MODEL_MANIFEST: continuum/model/*.adl-manifest.json
 
@@ -43,7 +43,7 @@ jobs:
       - name: Check out this repository
         uses: actions/checkout@v4
         with:
-          fetch-depth: 0          # the PR base is needed for the delta
+          fetch-depth: 0 # the PR base is needed for the delta
 
       - name: Check out the Continuum toolchain
         uses: actions/checkout@v4

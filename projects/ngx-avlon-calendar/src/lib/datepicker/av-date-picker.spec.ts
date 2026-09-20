@@ -390,6 +390,144 @@ describe('AvDatePicker without a form', () => {
 });
 
 // ------------------------------------------------------------------ //
+// The popover
+// ------------------------------------------------------------------ //
+
+@Component({
+  imports: [AvDatePicker],
+  template: `<av-date-picker [(value)]="picked" label="Date" [openOn]="openOn()" />`,
+})
+class PanelHost {
+  readonly picked = signal<Date | null>(null);
+  readonly openOn = signal<'icon' | 'input' | 'focus' | 'manual'>('icon');
+}
+
+describe('AvDatePicker popover', () => {
+  let fixture: ComponentFixture<PanelHost>;
+  let host: PanelHost;
+
+  beforeEach(async () => {
+    await TestBed.configureTestingModule({ imports: [PanelHost] }).compileComponents();
+    fixture = TestBed.createComponent(PanelHost);
+    host = fixture.componentInstance;
+    await settle();
+  });
+
+  async function settle(): Promise<void> {
+    fixture.detectChanges();
+    await fixture.whenStable();
+    fixture.detectChanges();
+    await fixture.whenStable();
+    fixture.detectChanges();
+  }
+
+  function toggleButton(): HTMLButtonElement {
+    // The input carries aria-expanded too, so match the button specifically.
+    const button = deepQuery<HTMLButtonElement>(fixture.nativeElement, 'button[aria-expanded]');
+    expect(button, 'expected a calendar toggle').toBeTruthy();
+    return button!;
+  }
+
+  function panel(): HTMLElement | null {
+    return deepQuery(fixture.nativeElement, '[role="dialog"]');
+  }
+
+  it('starts closed', () => {
+    expect(panel()).toBeNull();
+    expect(inputOf(fixture).getAttribute('aria-expanded')).toBe('false');
+  });
+
+  it('opens when the toggle is clicked', async () => {
+    toggleButton().click();
+    await settle();
+
+    expect(panel(), 'expected the panel to render').toBeTruthy();
+    expect(deepQuery(fixture.nativeElement, 'av-calendar')).toBeTruthy();
+    expect(inputOf(fixture).getAttribute('aria-expanded')).toBe('true');
+  });
+
+  it('renders a full month grid once open', async () => {
+    toggleButton().click();
+    await settle();
+    expect(deepQueryAll(fixture.nativeElement, '[role="gridcell"] button').length).toBe(42);
+  });
+
+  it('closes when the toggle is clicked again', async () => {
+    toggleButton().click();
+    await settle();
+    toggleButton().click();
+    await settle();
+    expect(panel()).toBeNull();
+  });
+
+  it('opens on Alt+ArrowDown from the field', async () => {
+    inputOf(fixture).dispatchEvent(
+      new KeyboardEvent('keydown', { key: 'ArrowDown', altKey: true, bubbles: true }),
+    );
+    await settle();
+    expect(panel()).toBeTruthy();
+  });
+
+  it('closes on Escape and returns focus to the field', async () => {
+    toggleButton().click();
+    await settle();
+
+    panel()!.dispatchEvent(new KeyboardEvent('keydown', { key: 'Escape', bubbles: true }));
+    await settle();
+
+    expect(panel()).toBeNull();
+  });
+
+  it('selects a day, writes the value, and closes', async () => {
+    toggleButton().click();
+    await settle();
+
+    const cell = deepQueryAll<HTMLButtonElement>(
+      fixture.nativeElement,
+      '[role="gridcell"] button:not([disabled])',
+    ).find((b) => b.getAttribute('aria-label')?.includes('15'));
+    expect(cell, 'expected a 15th in the grid').toBeTruthy();
+
+    cell!.click();
+    await settle();
+
+    expect(host.picked()).not.toBeNull();
+    expect(host.picked()!.getDate()).toBe(15);
+    expect(panel(), 'expected the panel to close on select').toBeNull();
+    expect(inputOf(fixture).value).not.toBe('');
+  });
+
+  it('opens on focus when asked to', async () => {
+    host.openOn.set('focus');
+    await settle();
+
+    inputOf(fixture).dispatchEvent(new Event('focus'));
+    await settle();
+    expect(panel()).toBeTruthy();
+  });
+
+  it('never opens on its own when the trigger is manual', async () => {
+    host.openOn.set('manual');
+    await settle();
+
+    inputOf(fixture).dispatchEvent(new Event('focus'));
+    inputOf(fixture).click();
+    await settle();
+    expect(panel()).toBeNull();
+  });
+
+  it('labels the panel as a dialog for assistive technology', async () => {
+    toggleButton().click();
+    await settle();
+
+    const dialog = panel()!;
+    expect(dialog.getAttribute('role')).toBe('dialog');
+    expect(dialog.getAttribute('aria-label')).toBe('Date calendar');
+    expect(dialog.hasAttribute('popover')).toBe(true);
+  });
+});
+
+// ------------------------------------------------------------------ //
 // Presentation
 // ------------------------------------------------------------------ //
 

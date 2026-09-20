@@ -1,0 +1,104 @@
+name: CI
+
+on:
+  push:
+    branches: [main, develop, 'release/**', 'hotfix/**']
+  pull_request:
+    branches: [main, develop]
+  workflow_dispatch:
+
+concurrency:
+  group: ci-${{ github.ref }}
+  cancel-in-progress: true
+
+permissions:
+  contents: read
+
+jobs:
+  verify:
+    name: Verify on Node ${{ matrix.node }}
+    runs-on: ubuntu-latest
+
+    strategy:
+      fail-fast: false
+      matrix:
+        node: ['20', '22', '24']
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: ${{ matrix.node }}
+          cache: npm
+
+      - name: Install
+        run: npm ci
+
+      - name: Check formatting
+        run: npx prettier --check "projects/**/*.{ts,html,css,json,md}" "*.{json,md}"
+
+      # The stylesheet is generated and committed. If regenerating it produces a
+      # different file, the committed copy is stale and the published package
+      # would not match its sources.
+      - name: Check the generated stylesheet is current
+        run: npm run styles:check
+
+      - name: Test the library
+        run: npx ng test ngx-avlon-calendar --no-watch
+
+      - name: Build the library
+        run: npx ng build ngx-avlon-calendar
+
+      - name: Test the demo
+        run: npx ng test demo --no-watch
+
+      - name: Build the demo
+        run: npx ng build demo
+
+      - name: Pack the library
+        working-directory: dist/ngx-avlon-calendar
+        run: npm pack --dry-run
+
+  package:
+    name: Package contents
+    runs-on: ubuntu-latest
+    needs: verify
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+          cache: npm
+
+      - run: npm ci
+      - run: npm run build:lib
+
+      # A UI library that ships a runtime dependency, or leaks Preflight into a
+      # consumer's page, has broken a promise made in its README. Both are
+      # cheap to assert and expensive to notice by hand.
+      - name: Assert the package has no runtime dependencies
+        run: |
+          deps=$(node -p "JSON.stringify(Object.keys(require('./dist/ngx-avlon-calendar/package.json').dependencies || {}))")
+          echo "dependencies: $deps"
+          test "$deps" = '["tslib"]' || {
+            echo "::error::Unexpected runtime dependencies: $deps"
+            exit 1
+          }
+
+      - name: Assert the component styles carry no Preflight
+        run: |
+          css=projects/ngx-avlon-calendar/src/lib/styles/av-styles.css
+          if grep -qE '^\s*(html|body|\*,)' "$css"; then
+            echo "::error::$css appears to contain a global reset"
+            exit 1
+          fi
+
+      - name: Upload the tarball
+        uses: actions/upload-artifact@v4
+        with:
+          name: package
+          path: dist/ngx-avlon-calendar
+          retention-days: 14

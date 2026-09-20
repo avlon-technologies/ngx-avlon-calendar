@@ -1,0 +1,62 @@
+name: Bug report
+description: Something does not behave as documented.
+labels: [bug, needs triage]
+body:
+  - type: markdown
+    attributes:
+      value: |
+        Thanks for the report. A failing test is the most useful form of one,
+        but a clear description is plenty to get started.
+
+  - type: textarea
+    id: what-happened
+    attributes:
+      label: What happened
+      description: What you did, what you expected, and what you got instead.
+    validations:
+      required: true
+
+  - type: textarea
+    id: reproduction
+    attributes:
+      label: Reproduction
+      description: >
+        The smallest markup and component inputs that show the problem, or a
+        link to a StackBlitz.
+      render: html
+    validations:
+      required: true
+
+  - type: input
+    id: package-version
+    attributes:
+      label: Package version
+      placeholder: 0.1.0
+    validations:
+      required: true
+
+  - type: input
+    id: angular-version
+    attributes:
+      label: Angular version
+      placeholder: 22.1.0
+    validations:
+      required: true
+
+  - type: dropdown
+    id: binding
+    attributes:
+      label: How is the picker bound?
+      options:
+        - Reactive forms (formControl / formControlName)
+        - Template-driven (ngModel)
+        - No form ([(value)])
+        - Not applicable
+    validations:
+      required: true
+
+  - type: input
+    id: browsers
+    attributes:
+      label: Browsers
+      placeholder: Chrome 140, Safari 18

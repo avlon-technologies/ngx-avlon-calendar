@@ -1,0 +1,27 @@
+name: Feature request
+description: Suggest a capability the library does not have.
+labels: [enhancement, needs triage]
+body:
+  - type: textarea
+    id: problem
+    attributes:
+      label: The problem
+      description: >
+        What are you trying to build, and where does the library get in the way?
+        Describe the situation rather than the solution.
+    validations:
+      required: true
+
+  - type: textarea
+    id: proposal
+    attributes:
+      label: What you have in mind
+      description: An API sketch is welcome but not required.
+
+  - type: textarea
+    id: workaround
+    attributes:
+      label: What you are doing today
+      description: >
+        Whether a workaround exists, and what it costs you, is the most useful
+        signal for prioritising this.

@@ -1,0 +1,8 @@
+blank_issues_enabled: false
+contact_links:
+  - name: Question or discussion
+    url: https://github.com/avlon-technologies/ngx-avlon-calendar/discussions
+    about: Ask how to do something, or talk through an idea before filing it.
+  - name: Security vulnerability
+    url: https://github.com/avlon-technologies/ngx-avlon-calendar/security/advisories/new
+    about: Report privately. Please do not open a public issue.

@@ -1,0 +1,106 @@
+name: Release
+
+# Gitflow: a release is a tag on `main`. Pushing `v0.2.0` publishes
+# @avlon/ngx-avlon-calendar@0.2.0 to npm and opens a GitHub release whose notes
+# are the matching section of the changelog.
+on:
+  push:
+    tags: ['v*.*.*']
+  workflow_dispatch:
+    inputs:
+      dry_run:
+        description: Build and validate without publishing
+        type: boolean
+        default: true
+
+concurrency:
+  group: release-${{ github.ref }}
+  cancel-in-progress: false
+
+permissions:
+  contents: write
+  id-token: write
+
+jobs:
+  release:
+    name: Publish
+    runs-on: ubuntu-latest
+    environment: npm
+
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+          cache: npm
+          registry-url: https://registry.npmjs.org
+
+      - name: Install
+        run: npm ci
+
+      - name: Verify
+        run: npm run verify
+
+      - name: Read the version being released
+        id: version
+        run: |
+          if [ "${{ github.ref_type }}" = "tag" ]; then
+            tag="${GITHUB_REF_NAME#v}"
+          else
+            tag=$(node -p "require('./projects/ngx-avlon-calendar/package.json').version")
+          fi
+          echo "version=$tag" >> "$GITHUB_OUTPUT"
+          echo "Releasing $tag"
+
+      # A tag that disagrees with package.json produces a release nobody can
+      # trace back, so stop before anything is published.
+      - name: Check the tag matches package.json
+        if: github.ref_type == 'tag'
+        run: |
+          pkg=$(node -p "require('./projects/ngx-avlon-calendar/package.json').version")
+          tag="${{ steps.version.outputs.version }}"
+          if [ "$pkg" != "$tag" ]; then
+            echo "::error::Tag v$tag does not match package.json version $pkg"
+            exit 1
+          fi
+
+      - name: Extract the release notes from the changelog
+        id: notes
+        run: |
+          version="${{ steps.version.outputs.version }}"
+          file=projects/ngx-avlon-calendar/CHANGELOG.md
+          # Everything between this version's heading and the next one.
+          awk -v v="$version" '
+            $0 ~ "^## \\[" v "\\]" { found = 1; next }
+            found && /^## \[/ { exit }
+            found { print }
+          ' "$file" > RELEASE_NOTES.md
+          if [ ! -s RELEASE_NOTES.md ]; then
+            echo "::error::No changelog section found for $version in $file"
+            exit 1
+          fi
+          echo "Release notes:"
+          cat RELEASE_NOTES.md
+
+      - name: Publish to npm
+        if: github.ref_type == 'tag' || inputs.dry_run == false
+        run: npm publish dist/ngx-avlon-calendar --access public --provenance
+        env:
+          NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
+
+      - name: Dry-run publish
+        if: github.ref_type != 'tag' && inputs.dry_run != false
+        run: npm publish dist/ngx-avlon-calendar --access public --dry-run
+
+      - name: Create the GitHub release
+        if: github.ref_type == 'tag'
+        uses: softprops/action-gh-release@v2
+        with:
+          name: v${{ steps.version.outputs.version }}
+          body_path: RELEASE_NOTES.md
+          draft: false
+          prerelease: ${{ contains(steps.version.outputs.version, '-') }}
+          files: dist/ngx-avlon-calendar/*.tgz

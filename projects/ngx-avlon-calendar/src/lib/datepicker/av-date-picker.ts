@@ -273,6 +273,18 @@ export class AvDatePicker implements ControlValueAccessor, Validator, DoCheck, O
       if (el && el.value !== text) el.value = text;
     });
 
+    // The panel is rendered by `@if (open())`, so it does not exist at the
+    // moment the open command runs. Waiting on the view child rather than a
+    // microtask is what makes this correct under zoneless change detection,
+    // where rendering has not happened by the end of the current task.
+    effect(() => {
+      const panel = this.panelRef()?.nativeElement;
+      const isOpen = this.open();
+      untracked(() => {
+        if (isOpen && panel) this.showPanel(panel);
+      });
+    });
+
     // Anything that changes what counts as valid has to re-run the validator.
     effect(() => {
       this.min();
@@ -741,9 +753,8 @@ export class AvDatePicker implements ControlValueAccessor, Validator, DoCheck, O
     if (this.open() || this.isDisabled() || this.readonly() || this.inline()) return;
     this.open.set(true);
     this.opened.emit();
-
-    // The panel only exists once the template has rendered it.
-    queueMicrotask(() => this.showPanel());
+    // The panel element does not exist yet. An effect watching `panelRef`
+    // picks it up once the view has rendered; see the constructor.
   }
 
   /** Closes the popover and returns focus to the input. */
@@ -775,9 +786,8 @@ export class AvDatePicker implements ControlValueAccessor, Validator, DoCheck, O
    * Promotes the panel to the top layer, places it, and starts the listeners
    * that keep it placed and dismissable.
    */
-  private showPanel(): void {
-    const panel = this.panelRef()?.nativeElement;
-    if (!panel) return;
+  private showPanel(panel: HTMLElement): void {
+    if (this.releasePanel) return;
 
     // jsdom and older engines have no popover API. The panel still renders and
     // works; it is simply positioned in flow rather than in the top layer.

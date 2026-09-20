@@ -1,0 +1,67 @@
+name: Deploy demo to GitHub Pages
+
+on:
+  push:
+    branches: [main]
+  workflow_dispatch:
+
+concurrency:
+  group: pages
+  cancel-in-progress: true
+
+permissions:
+  contents: read
+  pages: write
+  id-token: write
+
+jobs:
+  build:
+    name: Build
+    runs-on: ubuntu-latest
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+          cache: npm
+
+      - run: npm ci
+
+      - name: Build the library
+        run: npm run build:lib
+
+      # Pages serves the site from /<repo>/, so the base href has to match or
+      # every asset resolves against the domain root and 404s.
+      - name: Build the demo
+        run: npx ng build demo --base-href "/${{ github.event.repository.name }}/"
+
+      # The demo is a single-page application with no server-side routing, so
+      # Pages needs a 404 that serves the same document.
+      - name: Add a SPA fallback
+        run: cp dist/demo/browser/index.html dist/demo/browser/404.html
+
+      # Otherwise Pages runs the output through Jekyll, which drops files and
+      # directories whose names begin with an underscore.
+      - name: Disable Jekyll
+        run: touch dist/demo/browser/.nojekyll
+
+      - uses: actions/configure-pages@v5
+
+      - uses: actions/upload-pages-artifact@v3
+        with:
+          path: dist/demo/browser
+
+  deploy:
+    name: Deploy
+    runs-on: ubuntu-latest
+    needs: build
+
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
+
+    steps:
+      - id: deployment
+        uses: actions/deploy-pages@v4
